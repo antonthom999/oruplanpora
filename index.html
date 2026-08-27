@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oruplanpora</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&display=swap" rel="stylesheet" />
+  <style>
+    *, body, html { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; background: #fff; }
+
+
+    .title { padding: 0 20px; font-size: 40px; font-weight: bold; color: black; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: 'Give You Glory', cursive; }
+
+
+    .subtitle { text-align: center; font-size: clamp(14px, 3vw, 20px); color: #6e6e6e; margin: 20px 0; padding: 0 50px; user-select: none; }
+    .card-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; padding: 16px; }
+    .card { flex: 1 1 180px; max-width: 280px; padding: 12px; border: 2px solid #f0f0f0; border-radius: 15px; color: #696969; user-select: none; }
+    .card-number { font-size: 22px; font-weight: bold; color: #6e6e6e; margin-bottom: 8px; }
+    .card-image { width: 90px; height: 90px; display: block; margin: 0 auto 8px; }
+    .card-text { font-size: 15px; color: #555; text-align: center; }
+    .post-card { text-align: center; font-size: clamp(13px, 2.5vw, 18px); color: #6e6e6e; margin: 24px 0; padding: 0 20px; user-select: none; }
+    .btn-wrap { display: flex; justify-content: center; padding: 8px; }
+    .btn { padding: 18px 24px; font-size: clamp(15px, 3vw, 20px); border: 2px solid #d3d3d3; border-radius: 15px; background: #fff; color: #696969; cursor: pointer; transition: all 0.8s ease; user-select: none; }
+    .btn:hover { border-color: #fff; color: #000; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    .btn:active, .btn.clicked { background: #000; border-color: #000; color: #fff; transition: all 0.1s ease; }
+    .version { text-align: center; color: #d3d3d3; font-size: 13px; padding: 8px 0 16px; user-select: none; }
+    * {-webkit-tap-highlight-color: transparent;}
+  </style>
+</head>
+<body>
+
+  <div class="title">Oruplanpora</div>
+  <div class="subtitle">Welcome to <span style="color:#000">Oruplanpora</span>, a website that generates architectural floor plans for you. <br><br>Create, explore, and experiment with floor plans ideas - completely free.<br> It works in 3 steps:</div>
+
+  <div class="card-container">
+    <div class="card">
+      <div class="card-number">1</div>
+      <img src="images/step1.png" alt="Step 1" class="card-image">
+      <div class="card-text">Choose your rooms</div>
+    </div>
+    <div class="card">
+      <div class="card-number">2</div>
+      <img src="images/step2.png" alt="Step 2" class="card-image">
+      <div class="card-text">Adjust the connections and click generate</div>
+    </div>
+    <div class="card">
+      <div class="card-number">3</div>
+      <img src="images/step3.png" alt="Step 3" class="card-image">
+      <div class="card-text">Edit your plan, add stuff</div>
+    </div>
+  </div>
+
+  <div class="subtitle">
+    <p><span style="color:#000">Oruplanpora</span> is free for everyone and supported by advertisements. If you find it useful, please consider turning off your ad blocker or allowing ads on this website. Ads help us keep the generator free and accessible to everyone.<br><br>Thank you for being here - and happy designing!</p>
+  </div>
+
+  <div class="btn-wrap">
+    <button id="btn1" class="btn">Start creating</button>
+  </div>
+
+  <div class="version">Version 1.0.0</div>
+
+  <script>
+    document.getElementById('btn1').addEventListener('click', function() {
+      this.classList.add('clicked');
+      setTimeout(() => window.location.href = 'zoning.html', 200);
+    });
+  </script>
+
+</body>
+</html>
