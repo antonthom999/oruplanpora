@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oruplanpora</title>
+<link rel="icon" type="image/png" href="images/favicon.png">
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&display=swap" rel="stylesheet" />
+
+<style>
+  body, html { margin: 0; padding: 0; font-family: 'Roboto', sans-serif; background: #fff; display: flex; flex-direction: column; min-height: 100vh; }
+  .page-top { position: relative; min-height: 55px; }
+  .header { position: absolute; top: 0; left: 0; z-index: 2; background: #fff; display: flex; align-items: center; }
+  .title { padding: 0 20px; font-size: 40px; font-weight: bold; color: black; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: 'Give You Glory', cursive; }
+  .card-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 5px 10px; }
+  * {-webkit-tap-highlight-color: transparent;}
+
+
+  /* Narrow screen: stack title above card, no overlap */
+  @media (max-width: 800px) {
+    .page-top {
+      display: flex;
+      flex-direction: column;
+      min-height: unset;
+    }
+    .header {
+      position: static;
+    }
+  }
+  .card { display: flex; flex-direction: column; flex: 1 1 350px; max-width: 900px; min-width: 250px; padding: 7px; border: 2px solid #F0F0F0; border-radius: 15px; background: white; color: #696969; cursor: default; transition: all 1s ease; }
+  .card-title { font-size: 24px; color: #333333; margin-bottom: 10px; user-select: none; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 5px; }
+  .roomgroup-container { display: flex; flex-wrap: wrap; gap: 5px; }
+  .roomgroups { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
+button { outline: none; border-radius: 15px; flex-shrink: 1; user-select: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: all 0.2s ease; }
+  .room-btn, .sroom-btn { padding: 6px; font-size: 18px; border: 2px solid white; }
+  .room-btn { background: #F4F4F4; color: #696969; cursor: pointer; }
+  .room-btn:hover { border-color: #696969; background: #696969; color: white; }
+  .room-btn:active { border-color: black; background: black; color: white; }
+  .room-btn.clicked { background: black; border-color: black; color: white; }
+
+
+  .common-btn { padding: 7px; font-size: 20px; height: 40px; border: 2px solid #d3d3d3; border-radius: 15px; background: #fff; color: #696969; cursor: pointer;  outline: none; flex-shrink: 1; user-select: none; }
+
+  .common-btn:hover { background: #e0e0e0;}
+  .common-btn:active, .common-btn.clicked { border-color: black; background: black; color: #fff; }
+
+  button.clickgo-btn { padding: 27px; font-size: 20px; border: 2px solid #D3D3D3; border-radius: 15px; background: white; color: #696969; cursor: pointer; transition: all 1s ease; user-select: none; }
+
+  button.clickgo-btn:hover { border-color: white; color: black; box-shadow: 0 10px 50px rgba(0, 0, 0, 0.4); }
+  button.clickgo-btn:active { border-color: black; background: black; color: white; transition: all 0.1s ease; }
+
+
+  .button-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; padding: 0 10px 10px; background: #fff; }
+
+
+  .tooltip-container { position: relative; display: inline-block; }
+
+  .tooltip-text { visibility: hidden; background: black; color: white; border-radius: 10px; padding: 8px; position: absolute; top: 45px; left: 0; box-shadow: 0 8px 16px rgba(2, 2, 2, 0.2); opacity: 0; font-size: 14px; max-width: 250px; word-wrap: break-word; pointer-events: none; line-height: 1.3; z-index: 9999; }
+
+  .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+
+/* ── Examples Dropdown (Updated to match Settings Panel) ────── */
+  .examples-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    background: #1a1a1a;                /* Changed from #fff to match settings panel */
+    border: 2px solid #333;             /* Changed from #e0e0e0 to match settings panel */
+    border-radius: 14px;                /* Changed from 12px to match settings panel */
+    min-width: 250px;                   /* Changed from 200px to match settings panel */
+    max-width: 320px;
+    z-index: 300;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.4); /* Changed from 0.15 opacity to match settings panel */
+    padding: 14px 16px;                 /* Changed from 6px to match settings panel */
+    max-height: 340px; /* ~10 rows before a scrollbar appears */
+    overflow-y: auto;
+  }
+  .examples-dropdown.open { display: block; }
+  .examples-dropdown::-webkit-scrollbar { width: 8px; }
+  .examples-dropdown::-webkit-scrollbar-thumb { background: #333; border-radius: 8px; } /* Darkened scrollbar thumb */
+  .examples-dropdown::-webkit-scrollbar-track { background: transparent; }
+  .examples-item {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 13px;                    /* Changed from 15px to match settings panel text */
+    color: #eee;                        /* Changed from #696969 to match settings label */
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .examples-item:hover { 
+    background: #2a2a2a;                /* Custom dark hover background */
+    color: #fff;                        /* Pure white on hover */
+  }
+  .examples-item.examples-empty,
+  .examples-item.examples-loading { color: #555; cursor: default; } /* Adjusted placeholder contrast */
+  .examples-item.examples-empty:hover,
+  .examples-item.examples-loading:hover { background: none; }
+
+
+  /* ── Settings Panel (Dark Mode) ─────────────────────────────── */
+  .settings-wrapper { position: relative; display: inline-block; }
+  #settings-panel { display: none; position: absolute; right: 0; top: calc(100% + 6px); background: #1a1a1a; border: 2px solid #333; border-radius: 14px; padding: 14px 16px; z-index: 300; min-width: 250px; box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
+  #settings-panel.open { display: block; }
+  .settings-panel-title { font-size: 13px; font-weight: bold; color: #888; letter-spacing: 0.06em; margin-bottom: 10px;  }
+  .settings-row { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .settings-row label { flex: 1 1 100px; font-size: 13px; color: #eee; white-space: nowrap; }
+  .settings-row input[type="range"] { flex: 2; cursor: pointer; accent-color: #fff; }
+  .settings-val { width: 30px; text-align: right; font-size: 13px; color: #fff; font-variant-numeric: tabular-nums; }
+
+
+  /* ── Touch: disable browser pan/zoom on the canvas SVG ──────── */
+  #canvas-svg {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* ── Generate button: disabled state ────────────────────────── */
+  .generate-btn-wrap { position: relative; display: inline-block; }
+
+  button.clickgo-btn.generate-disabled {
+    border-color: #f5c0c0;
+    color: #aaa;
+    cursor: default;
+  }
+  button.clickgo-btn.generate-disabled:hover {
+    border-color: #e05555;
+    background: #fff5f5;
+    color: #c0392b;
+    border: 52px
+    box-shadow: 0 6px 28px rgba(200, 0, 0, 0.18);
+    cursor: not-allowed;
+  }
+  button.clickgo-btn.generate-disabled:active {
+    border-color: #f5c0c0;
+    background: #fff5f5;
+    color: #c0392b;
+  }
+
+  .generate-tooltip-text {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-line;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    min-width: 200px;
+    text-align: center;
+  }
+  .generate-btn-wrap:hover .generate-tooltip-text.visible {
+    display: block;
+  }
+</style>
+</head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<body>
+
+<div class="page-top">
+  <div class="header">
+    <div class="title">
+      <a id="title-link" href="index.html" style="text-decoration: none; color: inherit;">Oruplanpora</a>
+    </div>
+  </div>
+
+  <div class="card-container" style="padding: 5px 0;">
+    <div class="card"  id="room-selection-card">
+    <div class="card-title">Select the rooms for making the floor plan</div>
+    <div class="roomgroup-container">
+      <!-- Room groups -->
+      <div class="roomgroups">
+        <button class="room-btn" data-limit="5">Garage</button>
+        <button class="room-btn" data-limit="5">Parking</button>
+        <button class="room-btn" data-limit="5">Foyer</button>
+        <button class="room-btn" data-limit="5">Entryway</button>
+        <button class="room-btn" data-limit="5">Living</button>
+        <button class="room-btn" data-limit="5">Living-Dining</button>
+        <button class="room-btn" data-limit="5">Office</button>
+        <button class="room-btn" data-limit="5">Study</button>
+        <button class="room-btn" data-limit="5">Family Room</button>
+        <button class="room-btn" data-limit="5">Passage</button>
+      </div>
+      <div class="roomgroups">
+        <button class="room-btn" data-limit="5">Dining</button>
+        <button class="room-btn" data-limit="5">Powder</button>
+        <button class="room-btn" data-limit="5">Kitchen</button>
+        <button class="room-btn" data-limit="5">Store</button>
+        <button class="room-btn" data-limit="5">Work Area</button>
+        <button class="room-btn" data-limit="5">Pantry</button>
+        <button class="room-btn" data-limit="5">Walk-in Pantry</button>
+        <button class="room-btn" data-limit="5">Butler's Pantry</button>
+        <button class="room-btn" data-limit="5">Breakfast Nook</button>
+        <button class="room-btn" data-limit="5">Hallway</button>
+      </div>
+      <div class="roomgroups">
+        <button class="room-btn" data-limit="5">Bedroom</button>
+        <button class="room-btn" data-limit="5">Bedroom+Dress</button>
+        <button class="room-btn" data-limit="5">Bedroom+WIC</button>
+        <button class="room-btn" data-limit="5">Bedroom+Bathroom</button>
+        <button class="room-btn" data-limit="5">Bedroom+Ensuite</button>
+        <button class="room-btn" data-limit="5">Bedroom+Dress+Bathroom</button>
+        <button class="room-btn" data-limit="5">Bedroom+WIC+Ensuite</button>
+        <button class="room-btn" data-limit="5">Common Bathroom</button>
+        <button class="room-btn" data-limit="5">Corridor</button>
+      </div>
+      <div class="roomgroups">
+        <button class="room-btn" data-limit="5">Staircase</button>
+        <button class="room-btn" data-limit="5">Verandah</button>
+        <button class="room-btn" data-limit="5">Patio</button>
+        <button class="room-btn" data-limit="5">Deck</button>
+        <button class="room-btn" data-limit="5">Alfresco</button>
+        <button class="room-btn" data-limit="5">Sunroom</button>
+        <button class="room-btn" data-limit="5">Conservatory</button>
+        <button class="room-btn" data-limit="5">Courtyard</button>
+      </div>
+      <div class="roomgroups">
+        <button class="room-btn" data-limit="5">Home Theater</button>
+        <button class="room-btn" data-limit="5">Media Room</button>
+        <button class="room-btn" data-limit="5">Library</button>
+        <button class="room-btn" data-limit="5">Gym</button>
+        <button class="room-btn" data-limit="5">Game Room</button>
+        <button class="room-btn" data-limit="5">Sauna</button>
+        <button class="room-btn" data-limit="5">Steam Room</button>
+        <button class="room-btn" data-limit="5">Shower Room</button>
+      </div>
+      <div class="roomgroups">
+        <button class="room-btn" data-limit="5">Tea Room</button>
+        <button class="room-btn" data-limit="5">Prayer Room</button>
+        <button class="room-btn" data-limit="5">Puja</button>
+        <button class="room-btn" data-limit="5">Laundry</button>
+        <button class="room-btn" data-limit="5">Utility</button>
+        <button class="room-btn" data-limit="5">Mudroom</button>
+        <button class="room-btn" data-limit="5">Workshop</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- end .page-top -->
+
+
+
+<div class="card-container">
+  <div class="card" id="selection-card" style="min-height: 420px; padding: 7px;">
+    <div class="card-header">
+      <div class="card-title">Zoning<span id="zoning-filename" style="font-size:15px;color:#aaa;font-weight:normal;margin-left:6px;"></span></div>
+      <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
+
+        <div class="tooltip-container settings-wrapper">
+          <button id="exgbtn" class="common-btn">Examples</button>
+  
+          <!-- The dropdown container -->
+          <div id="examples-dropdown" class="examples-dropdown">
+
+            <button class="examples-item">Example 1: Basic Form</button>
+            <button class="examples-item">Example 2: Data Table</button>
+          </div>
+        </div>
+
+        <div class="tooltip-container">
+          <button id="save-btn" class="common-btn"><i class="fa-regular fa-floppy-disk"></i></button>
+          <span class="tooltip-text" style="width: 70px;">Save this zoning file</span>
+        </div>
+
+        <div class="tooltip-container">
+          <button id="load-btn" class="common-btn"><i class="fa-regular fa-folder-open"></i></button>
+          <span class="tooltip-text" style="width: 70px;">Open a zoning file</span>
+        </div>
+        <input type="file" id="load-input" accept=".zoning" style="display:none">
+
+        <div class="tooltip-container">
+          <button id="canvas-reset-btn" class="common-btn"><i class="fa-solid fa-recycle"></i></button>
+          <span class="tooltip-text" style="width: 70px;">Reset and start over</span>
+        </div>
+
+
+        <div class="tooltip-container">
+          <button id="zoom-fit-btn" class="common-btn">[⌕]</button>
+          <span class="tooltip-text">Zoom to fit</span>
+        </div>
+
+        <div class="tooltip-container">
+          <button id="connect-btn" class="common-btn" ><i class="fa-solid fa-share-nodes"></i></button>
+          <span class="tooltip-text">Connect two rooms</span>
+        </div>
+
+        <div class="tooltip-container">
+          <button id="delete-btn" class="common-btn"><i class="fa-solid fa-xmark"></i></button>
+          <span class="tooltip-text">Delete a room or connection</span>
+        </div>
+
+        <div class="tooltip-container">
+          <button id="rename-btn" class="common-btn"><i class="fa-solid fa-pencil"></i><span style="font-size: 0.75rem; margin-left: 4px;">name</span></button>
+          <span class="tooltip-text">Edit room name</span>
+        </div>
+
+        <div class="tooltip-container">
+          <button id="editarea-btn" class="common-btn"><i class="fa-solid fa-pencil"></i><span style="font-size: 0.75rem; margin-left: 4px;">area</span></button>
+          <span class="tooltip-text">Edit room area</span>
+        </div>
+
+        <div class="tooltip-container">
+          <button id="random-color-btn" class="common-btn"><i class="fa-solid fa-brush"></i></button>
+          <span class="tooltip-text">Colors! Since we are human</span>
+        </div>
+
+
+
+
+        <!-- Settings with dropdown panel -->
+        <div class="settings-wrapper">
+          <div class="tooltip-container">
+            <button id="settings-btn" class="common-btn"><i class="fa-solid fa-screwdriver-wrench"></i></button>
+            <span class="tooltip-text">Settings</span>
+          </div>
+          <div id="settings-panel">
+            <div class="settings-panel-title">Visual Settings</div>
+
+            <div class="settings-row">
+              <label>Circle Size</label>
+              <input type="range" id="s-circle-size" min="20" max="120" value="55">
+              <span class="settings-val" id="v-circle-size">55</span>
+            </div>
+
+            <div class="settings-row">
+              <label>Circle Stroke</label>
+              <input type="range" id="s-circle-stroke" min="1" max="30" value="10">
+              <span class="settings-val" id="v-circle-stroke">10</span>
+            </div>
+
+            <div class="settings-row">
+              <label>Line Thickness</label>
+              <input type="range" id="s-line-thick" min="10" max="300" value="126">
+              <span class="settings-val" id="v-line-thick">126</span>
+            </div>
+
+            <div class="settings-row">
+              <label>Font Size</label>
+              <input type="range" id="s-font-size" min="8" max="36" value="18">
+              <span class="settings-val" id="v-font-size">18</span>
+            </div>
+
+            <div class="settings-row">
+              <label>Show Area</label>
+              <input type="checkbox" id="s-show-area" checked style="width:18px;height:18px;cursor:pointer;accent-color:#fff;">
+            </div>
+          </div>
+        </div>
+
+        <div class="tooltip-container">
+          <button id="btn12" class="common-btn">?</button>
+          <span class="tooltip-text">Help</span>
+        </div>
+
+
+      </div>
+    </div>
+    <svg id="canvas-svg" style="width:100%;height:500px;cursor:grab;border-radius:10px;background:#fafafa;display:block;">
+      <g id="canvas-group">
+        <g id="connections-layer"></g>
+        <g id="rooms-layer"></g>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="button-container">
+  <div class="generate-btn-wrap">
+    <button id="btn1" class="clickgo-btn">
+      <span style="display: block;">Click here to generate your floorplan</span>
+      <span style="display: block; font-size: 11px; margin-top: 4px; ">
+        It might upto 5 seconds when clicking for the first time.
+      </span>
+    </button>
+    <span id="btn1-tooltip" class="generate-tooltip-text"></span>
+  </div>
+</div>
+
+
+
+<script>
+// ─── SETTINGS ──────────────────────────────────────────────────
+const settings = {
+  circleRadius : 55,
+  circleStroke : 10,
+  lineThickness: 126,
+  fontSize     : 18,
+  showArea     : true
+};
+
+// ─── ROOM AREAS (sqm) ─────────────────────────────────────────────
+// ★ ADD / EDIT AREA VALUES HERE — one entry per room type
+const ROOM_AREAS = {
+  'Garage'                  : 36,
+  'Parking'                 : 15,
+  'Foyer'                   : 6,
+  'Entryway'                : 4,
+  'Living'                  : 25,
+  'Living-Dining'           : 40,
+  'Office'                  : 12,
+  'Study'                   : 10,
+  'Family Room'             : 20,
+  'Passage'                 : 8,
+  'Dining'                  : 18,
+  'Powder'                  : 3,
+  'Kitchen'                 : 15,
+  'Store'                   : 5,
+  'Work Area'               : 8,
+  'Pantry'                  : 4,
+  'Walk-in Pantry'          : 6,
+  "Butler's Pantry"         : 8,
+  'Breakfast Nook'          : 6,
+  'Hallway'                 : 10,
+  'Bedroom'                 : 16,
+  'Common Bathroom'         : 6,
+  'Corridor'                : 7,
+  'Staircase'               : 5,
+  'Verandah'                : 12,
+  'Patio'                   : 20,
+  'Deck'                    : 15,
+  'Alfresco'                : 18,
+  'Sunroom'                 : 14,
+  'Conservatory'            : 12,
+  'Courtyard'               : 25,
+  'Home Theater'            : 20,
+  'Media Room'              : 18,
+  'Library'                 : 12,
+  'Gym'                     : 15,
+  'Game Room'               : 22,
+  'Sauna'                   : 4,
+  'Steam Room'              : 4,
+  'Shower Room'             : 5,
+  'Tea Room'                : 8,
+  'Prayer Room'             : 6,
+  'Puja'                    : 4,
+  'Laundry'                 : 7,
+  'Utility'                 : 6,
+  'Mudroom'                 : 5,
+  'Workshop'                : 12,
+  'Bathroom'                : 8,
+  'Ensuite'                 : 7,
+  'Dress'                   : 6,
+  'WIC'                     : 8
+};
+
+// ─── CONSTANTS ─────────────────────────────────────────────────
+const STROKE_COLOR  = '#555';
+const STROKE_NORMAL = () => String(settings.circleStroke);
+const STROKE_ACTIVE = () => String(Math.max(settings.circleStroke + 4, 14));
+
+// ─── CANVAS STATE ──────────────────────────────────────────────
+const canvasRooms       = [];
+const canvasConnections = [];
+let canvasTransform     = { x: 0, y: 0, scale: 1 };
+let mode                = null;
+let connectFirst        = null;
+let connectFirstCircle  = null;
+let connectFirstRoom    = null;
+let roomIdCounter       = 0;
+let connIdCounter       = 0;
+
+const svg              = document.getElementById('canvas-svg');
+const canvasGroup      = document.getElementById('canvas-group');
+const connectionsLayer = document.getElementById('connections-layer');
+const roomsLayer       = document.getElementById('rooms-layer');
+
+// ─── TRANSFORM ─────────────────────────────────────────────────
+function applyTransform() {
+  canvasGroup.setAttribute('transform',
+    `translate(${canvasTransform.x},${canvasTransform.y}) scale(${canvasTransform.scale})`);
+}
+
+// ─── AUTO-PLACE ────────────────────────────────────────────────
+function findFreePosition(r) {
+  const rect = svg.getBoundingClientRect();
+  const cx = (rect.width  / 2 - canvasTransform.x) / canvasTransform.scale;
+  const cy = (rect.height / 2 - canvasTransform.y) / canvasTransform.scale;
+  if (canvasRooms.length === 0) return { x: cx, y: cy };
+
+  for (let i = 0; i < 400; i++) {
+    const angle  = i * 2.4;
+    const spiral = 20 + i * 9;
+    const x = 1.25*cx + Math.cos(angle) * spiral;
+    const y = 1.25*cy + Math.sin(angle) * spiral;
+    const ok = canvasRooms.every(o => {
+      const dx = o.x - x, dy = o.y - y;
+      return Math.hypot(dx, dy) >= o.r + r + 12;
+    });
+    if (ok) return { x, y };
+  }
+  return { x: cx + canvasRooms.length * 125, y: cy };
+}
+
+// ─── TEXT LINES ────────────────────────────────────────────────
+function getTextLines(name) {
+  const words = name.split(' ');
+  if (words.length <= 1) return [name];
+  const mid = Math.ceil(words.length / 2);
+  return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+}
+
+// ─── BUILD SVG TEXT ELEMENT ────────────────────────────────────
+function createTextElement(name, color) {
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  text.setAttribute('text-anchor', 'middle');
+  text.setAttribute('font-size',   settings.fontSize);
+  text.setAttribute('fill',        color || '#333');
+  text.setAttribute('font-family', 'Roboto, sans-serif');
+  text.classList.add('room-name');
+  text.style.pointerEvents = 'none';
+  text.style.userSelect    = 'none';
+
+  // Shift name up slightly when area is displayed so both fit inside circle
+  const yShift = settings.showArea ? -Math.round(settings.fontSize * 0.65) : 0;
+
+  const lines = getTextLines(name);
+  if (lines.length === 1) {
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('y', yShift);
+    text.textContent = name;
+  } else {
+    const lh = Math.max(12, settings.fontSize * 0.85);
+    const startY = yShift - (lines.length - 1) * lh / 2;
+    lines.forEach((line, i) => {
+      const ts = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+      ts.setAttribute('x', '0');
+      ts.setAttribute('dy', i === 0 ? startY : lh);
+      ts.setAttribute('dominant-baseline', 'middle');
+      ts.textContent = line;
+      text.appendChild(ts);
+    });
+  }
+  return text;
+}
+
+// ─── UPDATE ROOM LABEL ─────────────────────────────────────────
+function updateRoomLabel(ro) {
+  const old = ro.el.querySelector('text.room-name');
+  if (old) old.remove();
+  ro.el.appendChild(createTextElement(ro.name, ro.textColor || '#333'));
+  updateAreaLabel(ro);
+}
+
+// ─── UPDATE AREA LABEL ─────────────────────────────────────────
+function updateAreaLabel(ro) {
+  const old = ro.el.querySelector('text.room-area');
+  if (old) old.remove();
+  if (!settings.showArea) return;
+
+  const areaEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  areaEl.classList.add('room-area');
+  areaEl.setAttribute('text-anchor',        'middle');
+  areaEl.setAttribute('dominant-baseline',  'middle');
+  areaEl.setAttribute('font-size',          Math.round(settings.fontSize * 0.75));
+  areaEl.setAttribute('fill',               ro.textColor || '#333');
+  areaEl.setAttribute('font-family',        'Roboto, sans-serif');
+  areaEl.setAttribute('y',                  Math.round(settings.fontSize * 0.85));
+  areaEl.style.pointerEvents = 'none';
+  areaEl.style.userSelect    = 'none';
+  areaEl.textContent = (ro.area !== undefined ? ro.area : 10) + ' sqm';
+  ro.el.appendChild(areaEl);
+}
+
+// ─── REFRESH LABELS globally for a given partName ──────────────
+function refreshAllLabels(partName) {
+  const peers = canvasRooms.filter(r => r.partName === partName);
+  const multi = peers.length > 1;
+  peers.forEach(r => {
+    const newName = multi ? (r.partName + r.instanceNum) : r.partName;
+    if (newName !== r.name) {
+      r.name = newName;
+      updateRoomLabel(r);
+    }
+  });
+}
+
+// ─── RENDER ROOM ───────────────────────────────────────────────
+function renderRoom(ro) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('id', ro.id);
+  g.setAttribute('transform', `translate(${ro.x},${ro.y})`);
+  g.style.cursor = 'grab';
+
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('r',            ro.r);
+  circle.setAttribute('fill',         ro.fillColor   || '#D3D3D3');
+  circle.setAttribute('stroke',       ro.strokeColor || STROKE_COLOR);
+  circle.setAttribute('stroke-width', STROKE_NORMAL());
+
+  g.appendChild(circle);
+  roomsLayer.appendChild(g);
+  ro.el     = g;
+  ro.circle = circle;
+
+  updateRoomLabel(ro);   // builds name + area text now that ro.el is set
+
+  makeDraggable(g, ro);
+
+  // ── Mouse click (desktop) ──────────────────────────────────
+  g.addEventListener('click', e => {
+    e.stopPropagation();
+    if (mode === 'delete')    { deleteRoom(ro);    return; }
+    if (mode === 'connect')   { handleConnect(ro); return; }
+    if (mode === 'rename')    { handleRename(ro);  return; }
+    if (mode === 'editarea')  { handleEditArea(ro); return; }
+    if (mode === 'randcolor') { applyRandomColorToRoom(ro); return; }
+  });
+
+  // ── Touch tap (mobile) — fired from makeDraggable's touchend ─
+  // Handled inside makeDraggable via the onTouchEnd callback below.
+}
+
+// ─── SPAWN ROOM ────────────────────────────────────────────────
+function spawnRoom(partName, baseName, instanceNum) {
+  const area = ROOM_AREAS[partName] !== undefined ? ROOM_AREAS[partName] : 10;
+  const r   = Math.max(20, Math.round(settings.circleRadius * Math.sqrt(area / 10)));
+  const pos = findFreePosition(r);
+  const id  = 'room-' + roomIdCounter++;
+  const ro  = { id, name: partName, baseName, partName, instanceNum, x: pos.x, y: pos.y, r, area, fillColor: '#D3D3D3', strokeColor: STROKE_COLOR, textColor: '#333', el: null, circle: null };
+  canvasRooms.push(ro);
+  renderRoom(ro);
+  updateGenerateBtn();
+  return ro;
+}
+
+// ─── LOAD ROOM (for restore, uses saved coords & id) ───────────
+function loadRoomDirect(saved, fillColor, strokeColor, textColor) {
+  const ro = {
+    id         : saved.id,
+    name       : saved.n,
+    baseName   : saved.bn,
+    partName   : saved.pn,
+    instanceNum: saved.in,
+    x          : saved.x,
+    y          : saved.y,
+    area       : saved.a !== undefined ? saved.a : 10,
+    r          : Math.max(20, Math.round(settings.circleRadius * Math.sqrt((saved.a !== undefined ? saved.a : 10) / 10))),
+    fillColor,
+    strokeColor,
+    textColor,
+    el         : null,
+    circle     : null
+  };
+  canvasRooms.push(ro);
+  renderRoom(ro);
+  return ro;
+}
+
+// ─── DRAG (mouse + touch) ──────────────────────────────────────
+function makeDraggable(el, ro) {
+  let dragging  = false;
+  let startInput, startPos, touchStartPos;
+  const TAP_THRESHOLD = 10; // px — movement under this counts as a tap
+
+  // ── MOUSE drag ──────────────────────────────────────────────
+  el.addEventListener('mousedown', e => {
+    if (mode) return;
+    e.stopPropagation();
+    dragging   = true;
+    startInput = { x: e.clientX, y: e.clientY };
+    startPos   = { x: ro.x, y: ro.y };
+    el.style.cursor = 'grabbing';
+
+    const onMove = e => {
+      if (!dragging) return;
+      const nx = startPos.x + (e.clientX - startInput.x) / canvasTransform.scale;
+      const ny = startPos.y + (e.clientY - startInput.y) / canvasTransform.scale;
+      const clear = canvasRooms.every(o =>
+        o.id === ro.id || Math.hypot(o.x - nx, o.y - ny) >= o.r + ro.r + 6);
+      if (clear) {
+        ro.x = nx; ro.y = ny;
+        el.setAttribute('transform', `translate(${nx},${ny})`);
+        updateLines(ro.id);
+      }
+    };
+    const onUp = () => {
+      dragging = false;
+      el.style.cursor = 'grab';
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup',   onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup',   onUp);
+  });
+
+  // ── TOUCH drag / tap ────────────────────────────────────────
+  el.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) return;
+    e.stopPropagation(); // prevent SVG pan from starting
+    e.preventDefault();
+
+    const t = e.touches[0];
+    touchStartPos = { x: t.clientX, y: t.clientY };
+
+    // Only begin drag tracking when no mode is active
+    if (!mode) {
+      dragging   = true;
+      startInput = { x: t.clientX, y: t.clientY };
+      startPos   = { x: ro.x, y: ro.y };
+    }
+
+    // ── Always register move + end so mode taps are captured ──
+    const onTouchMove = e => {
+      if (!dragging || e.touches.length !== 1) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      const nx = startPos.x + (t.clientX - startInput.x) / canvasTransform.scale;
+      const ny = startPos.y + (t.clientY - startInput.y) / canvasTransform.scale;
+      const clear = canvasRooms.every(o =>
+        o.id === ro.id || Math.hypot(o.x - nx, o.y - ny) >= o.r + ro.r + 6);
+      if (clear) {
+        ro.x = nx; ro.y = ny;
+        el.setAttribute('transform', `translate(${nx},${ny})`);
+        updateLines(ro.id);
+      }
+    };
+
+    const onTouchEnd = e => {
+      e.stopPropagation();
+
+      // Measure finger travel to decide tap vs drag
+      const dist = touchStartPos && e.changedTouches.length > 0
+        ? Math.hypot(
+            e.changedTouches[0].clientX - touchStartPos.x,
+            e.changedTouches[0].clientY - touchStartPos.y)
+        : Infinity;
+      const wasTap = dist < TAP_THRESHOLD;
+
+      // Fire mode action on tap
+      if (mode && wasTap) {
+        if      (mode === 'delete')    deleteRoom(ro);
+        else if (mode === 'connect')   handleConnect(ro);
+        else if (mode === 'rename')    handleRename(ro);
+        else if (mode === 'editarea')  handleEditArea(ro);
+        else if (mode === 'randcolor') applyRandomColorToRoom(ro);
+      }
+
+      dragging      = false;
+      touchStartPos = null;
+      el.style.cursor = 'grab';
+      el.removeEventListener('touchmove',   onTouchMove);
+      el.removeEventListener('touchend',    onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+    };
+
+    el.addEventListener('touchmove',   onTouchMove, { passive: false });
+    el.addEventListener('touchend',    onTouchEnd);
+    el.addEventListener('touchcancel', onTouchEnd);
+  }, { passive: false });
+}
+
+// ─── CONNECTIONS ───────────────────────────────────────────────
+function addConnection(aId, bId, lineColor) {
+  if (canvasConnections.some(c =>
+    (c.from === aId && c.to === bId) || (c.from === bId && c.to === aId))) return;
+  const a = canvasRooms.find(r => r.id === aId);
+  const b = canvasRooms.find(r => r.id === bId);
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+  line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+  line.setAttribute('stroke',         lineColor || STROKE_COLOR);
+  line.setAttribute('stroke-width',   settings.lineThickness);
+  line.setAttribute('stroke-linecap', 'round');
+  line.style.cursor = 'grab';
+  const id = 'conn-' + connIdCounter++;
+  line.setAttribute('id', id);
+
+  const conn = { id, from: aId, to: bId, lineColor: lineColor || STROKE_COLOR, el: line };
+  connectionsLayer.appendChild(line);
+  canvasConnections.push(conn);
+
+  // Mouse click — delete in delete mode
+  line.addEventListener('click', e => {
+    if (mode !== 'delete') return;
+    e.stopPropagation();
+    deleteConnection(conn);
+  });
+
+  // Touch tap — delete in delete mode
+  line.addEventListener('touchend', e => {
+    if (mode !== 'delete') return;
+    e.preventDefault();
+    e.stopPropagation();
+    deleteConnection(conn);
+  });
+
+  updateGenerateBtn();
+}
+
+function updateLines(roomId) {
+  canvasConnections.forEach(c => {
+    if (c.from !== roomId && c.to !== roomId) return;
+    const a = canvasRooms.find(r => r.id === c.from);
+    const b = canvasRooms.find(r => r.id === c.to);
+    c.el.setAttribute('x1', a.x); c.el.setAttribute('y1', a.y);
+    c.el.setAttribute('x2', b.x); c.el.setAttribute('y2', b.y);
+  });
+}
+
+function handleConnect(ro) {
+  if (!connectFirst) {
+    connectFirst       = ro.id;
+    connectFirstRoom   = ro;
+    connectFirstCircle = ro.circle;
+    ro.circle.setAttribute('stroke',       ro.strokeColor || STROKE_COLOR);
+    ro.circle.setAttribute('stroke-width', STROKE_ACTIVE());
+  } else if (connectFirst !== ro.id) {
+    addConnection(connectFirst, ro.id);
+    connectFirstCircle.setAttribute('stroke',       connectFirstRoom ? (connectFirstRoom.strokeColor || STROKE_COLOR) : STROKE_COLOR);
+    connectFirstCircle.setAttribute('stroke-width', STROKE_NORMAL());
+    ro.circle.setAttribute('stroke',       ro.strokeColor || STROKE_COLOR);
+    ro.circle.setAttribute('stroke-width', STROKE_NORMAL());
+    connectFirst = null; connectFirstRoom = null; connectFirstCircle = null;
+  }
+}
+
+// ─── DELETE CONNECTION ──────────────────────────────────────────
+function deleteConnection(conn) {
+  conn.el.remove();
+  const idx = canvasConnections.findIndex(c => c.id === conn.id);
+  if (idx !== -1) canvasConnections.splice(idx, 1);
+  updateGenerateBtn();
+}
+
+// ─── DELETE ROOM ───────────────────────────────────────────────
+function deleteRoom(ro) {
+  canvasConnections
+    .filter(c => c.from === ro.id || c.to === ro.id)
+    .forEach(c => c.el.remove());
+  canvasConnections.splice(0, canvasConnections.length,
+    ...canvasConnections.filter(c => c.from !== ro.id && c.to !== ro.id));
+
+  ro.el.remove();
+  canvasRooms.splice(canvasRooms.findIndex(r => r.id === ro.id), 1);
+
+  roomClickCounts[ro.baseName]--;
+  const orig = [...roomButtons].find(b => b.dataset.room === ro.baseName);
+  if (orig && roomClickCounts[ro.baseName] < roomClickLimits[ro.baseName]) orig.style = '';
+
+  refreshAllLabels(ro.partName);
+  updateGenerateBtn();
+}
+
+// ─── PAN (mouse) ───────────────────────────────────────────────
+let panning = false, panStart;
+
+svg.addEventListener('mousedown', e => {
+  if (mode) return;
+  panning  = true;
+  panStart = { x: e.clientX - canvasTransform.x, y: e.clientY - canvasTransform.y };
+  svg.style.cursor = 'grab';
+});
+window.addEventListener('mousemove', e => {
+  if (!panning) return;
+  canvasTransform.x = e.clientX - panStart.x;
+  canvasTransform.y = e.clientY - panStart.y;
+  applyTransform();
+});
+window.addEventListener('mouseup', () => {
+  if (!panning) return;
+  panning = false;
+  svg.style.cursor = mode ? 'crosshair' : 'grab';
+});
+
+// ─── PAN + PINCH ZOOM (touch) ──────────────────────────────────
+let touchGesture = null; // null | { type:'pan', ... } | { type:'pinch', ... }
+
+function getTouchDist(t1, t2) {
+  return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+}
+
+svg.addEventListener('touchstart', e => {
+  e.preventDefault(); // prevent page scroll / browser zoom
+
+  if (e.touches.length === 1) {
+    // Single finger — pan (only when no mode active; mode taps are handled by rooms)
+    const t = e.touches[0];
+    touchGesture = {
+      type  : 'pan',
+      startX: t.clientX - canvasTransform.x,
+      startY: t.clientY - canvasTransform.y
+    };
+  } else if (e.touches.length === 2) {
+    // Two fingers — pinch zoom
+    const t1 = e.touches[0], t2 = e.touches[1];
+    const rect = svg.getBoundingClientRect();
+    const midX = (t1.clientX + t2.clientX) / 2 - rect.left;
+    const midY = (t1.clientY + t2.clientY) / 2 - rect.top;
+    touchGesture = {
+      type      : 'pinch',
+      startDist : getTouchDist(t1, t2),
+      startScale: canvasTransform.scale,
+      startTx   : canvasTransform.x,
+      startTy   : canvasTransform.y,
+      // Canvas-space anchor point (stays fixed as we scale)
+      anchorCX  : (midX - canvasTransform.x) / canvasTransform.scale,
+      anchorCY  : (midY - canvasTransform.y) / canvasTransform.scale,
+      anchorSX  : midX, // screen-space anchor
+      anchorSY  : midY
+    };
+    panning = false; // cancel any ongoing pan
+  }
+}, { passive: false });
+
+svg.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!touchGesture) return;
+
+  if (touchGesture.type === 'pan' && e.touches.length === 1) {
+    const t = e.touches[0];
+    canvasTransform.x = t.clientX - touchGesture.startX;
+    canvasTransform.y = t.clientY - touchGesture.startY;
+    applyTransform();
+
+  } else if (touchGesture.type === 'pinch' && e.touches.length === 2) {
+    const t1 = e.touches[0], t2 = e.touches[1];
+    const dist = getTouchDist(t1, t2);
+    const ns = Math.min(Math.max(
+      touchGesture.startScale * (dist / touchGesture.startDist), 0.15), 6);
+
+    // Keep the pinch anchor fixed in canvas space
+    canvasTransform.scale = ns;
+    canvasTransform.x = touchGesture.anchorSX - touchGesture.anchorCX * ns;
+    canvasTransform.y = touchGesture.anchorSY - touchGesture.anchorCY * ns;
+    applyTransform();
+  }
+}, { passive: false });
+
+svg.addEventListener('touchend', e => {
+  e.preventDefault();
+  if (e.touches.length === 0) {
+    touchGesture = null;
+  } else if (e.touches.length === 1 && touchGesture?.type === 'pinch') {
+    // Fingers lifted to one — restart pan from current position
+    const t = e.touches[0];
+    touchGesture = {
+      type  : 'pan',
+      startX: t.clientX - canvasTransform.x,
+      startY: t.clientY - canvasTransform.y
+    };
+  }
+}, { passive: false });
+
+svg.addEventListener('touchcancel', () => { touchGesture = null; });
+
+// ─── ZOOM (mouse wheel) ────────────────────────────────────────
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect  = svg.getBoundingClientRect();
+  const mx    = e.clientX - rect.left;
+  const my    = e.clientY - rect.top;
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  const ns    = Math.min(Math.max(canvasTransform.scale * delta, 0.15), 6);
+  canvasTransform.x = mx - (mx - canvasTransform.x) * (ns / canvasTransform.scale);
+  canvasTransform.y = my - (my - canvasTransform.y) * (ns / canvasTransform.scale);
+  canvasTransform.scale = ns;
+  applyTransform();
+}, { passive: false });
+
+// ─── ZOOM TO FIT ───────────────────────────────────────────────
+document.getElementById('zoom-fit-btn').addEventListener('click', () => {
+  if (!canvasRooms.length) return;
+  const pad  = 40;
+  const rect = svg.getBoundingClientRect();
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  canvasRooms.forEach(r => {
+    minX = Math.min(minX, r.x - r.r); minY = Math.min(minY, r.y - r.r);
+    maxX = Math.max(maxX, r.x + r.r); maxY = Math.max(maxY, r.y + r.r);
+  });
+  const s = Math.min(rect.width  / (maxX - minX + pad * 2),
+                     rect.height / (maxY - minY + pad * 2), 2);
+  canvasTransform.scale = s;
+  canvasTransform.x = (rect.width  - (minX + maxX) * s) / 2;
+  canvasTransform.y = (rect.height - (minY + maxY) * s) / 2;
+  applyTransform();
+});
+
+// ─── FULL CANVAS RESET ─────────────────────────────────────────
+function fullReset() {
+  roomButtons.forEach(b => {
+    const key = b.dataset.room;
+    roomClickCounts[key] = 0;
+  });
+  roomButtons.forEach(b => b.style = '');
+  roomsLayer.innerHTML        = '';
+  connectionsLayer.innerHTML  = '';
+  canvasRooms.length          = 0;
+  canvasConnections.length    = 0;
+  connectFirst = null; connectFirstCircle = null;
+  roomIdCounter  = 0;
+  connIdCounter  = 0;
+  canvasTransform = { x: 0, y: 0, scale: 1 };
+  applyTransform();
+  updateGenerateBtn();
+}
+
+document.getElementById('canvas-reset-btn').addEventListener('click', fullReset);
+
+// ─── CONNECT TOGGLE ────────────────────────────────────────────
+document.getElementById('connect-btn').addEventListener('click', () => {
+  setMode(mode === 'connect' ? null : 'connect');
+});
+
+// ─── DELETE TOGGLE ─────────────────────────────────────────────
+document.getElementById('delete-btn').addEventListener('click', () => {
+  setMode(mode === 'delete' ? null : 'delete');
+});
+
+function setMode(m) {
+  if (connectFirstCircle) {
+    connectFirstCircle.setAttribute('stroke', connectFirstRoom ? (connectFirstRoom.strokeColor || STROKE_COLOR) : STROKE_COLOR);
+    connectFirstCircle.setAttribute('stroke-width', STROKE_NORMAL());
+    connectFirst = null; connectFirstRoom = null; connectFirstCircle = null;
+  }
+  mode = m;
+  document.getElementById('connect-btn')    .classList.toggle('clicked', m === 'connect');
+  document.getElementById('delete-btn')     .classList.toggle('clicked', m === 'delete');
+  document.getElementById('rename-btn')     .classList.toggle('clicked', m === 'rename');
+  document.getElementById('editarea-btn')   .classList.toggle('clicked', m === 'editarea');
+  document.getElementById('random-color-btn').classList.toggle('clicked', m === 'randcolor');
+  svg.style.cursor = m ? 'crosshair' : 'grab';
+}
+
+// ─── RENAME HANDLER ────────────────────────────────────────────
+function handleRename(ro) {
+  const newName = prompt('Rename room:', ro.name);
+  if (newName === null || newName.trim() === '') return;
+  ro.name = newName.trim();
+  updateRoomLabel(ro);
+  setMode(null);
+}
+
+// ─── EDIT AREA HANDLER ─────────────────────────────────────────
+function handleEditArea(ro) {
+  const current = ro.area !== undefined ? ro.area : 10;
+  const input = prompt('Enter area for "' + ro.name + '" (sqm):', current);
+  if (input === null || input.trim() === '') return;
+  const val = parseFloat(input.trim());
+  if (isNaN(val) || val <= 0) { alert('Please enter a valid positive number.'); return; }
+  ro.area = val;
+  ro.r = Math.max(20, Math.round(settings.circleRadius * Math.sqrt(val / 10)));
+  ro.circle.setAttribute('r', ro.r);
+  updateAreaLabel(ro);
+  setMode(null);
+}
+
+// ─── COLOR HELPERS ──────────────────────────────────────────────
+function randomHue() { return Math.floor(Math.random() * 360); }
+
+function hslToRgb(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [Math.round(f(0)*255), Math.round(f(8)*255), Math.round(f(4)*255)];
+}
+
+function contrastColor(h, s, l) {
+  const [r, g, b] = hslToRgb(h, s, l);
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.52 ? '#222222' : '#ffffff';
+}
+
+function randHsl(sMin, sMax, lMin, lMax) {
+  const h = randomHue();
+  const s = sMin + Math.floor(Math.random() * (sMax - sMin));
+  const l = lMin + Math.floor(Math.random() * (lMax - lMin));
+  return { h, s, l, css: `hsl(${h},${s}%,${l}%)` };
+}
+
+function applyRandomColorToRoom(ro, fillColor, strokeColor, textColor) {
+  ro.fillColor   = fillColor;
+  ro.strokeColor = strokeColor;
+  ro.textColor   = textColor;
+  ro.circle.setAttribute('fill',   fillColor);
+  ro.circle.setAttribute('stroke', strokeColor);
+  updateRoomLabel(ro);
+}
+
+function applyRandomColors() {
+  const fill   = randHsl(40, 75, 45, 80);
+  const stroke = randHsl(40, 75, 20, 50);
+  const line   = randHsl(40, 75, 30, 55);
+  const text   = contrastColor(fill.h, fill.s, fill.l);
+
+  canvasRooms.forEach(ro => applyRandomColorToRoom(ro, fill.css, stroke.css, text));
+  canvasConnections.forEach(conn => {
+    conn.lineColor = line.css;
+    conn.el.setAttribute('stroke', line.css);
+  });
+}
+
+// ─── RENAME TOGGLE ─────────────────────────────────────────────
+document.getElementById('rename-btn').addEventListener('click', () => {
+  setMode(mode === 'rename' ? null : 'rename');
+});
+
+// ─── EDIT AREA TOGGLE ──────────────────────────────────────────
+document.getElementById('editarea-btn').addEventListener('click', () => {
+  setMode(mode === 'editarea' ? null : 'editarea');
+});
+
+// ─── RANDOM COLOR BUTTON ────────────────────────────────────────
+document.getElementById('random-color-btn').addEventListener('click', () => {
+  applyRandomColors();
+});
+
+// ─── ROOM SELECTION (top card) ──────────────────────────────────────
+const roomClickCounts      = {};
+const roomClickLimits      = {};
+const roomButtons = document.querySelectorAll('#room-selection-card .room-btn');
+
+roomButtons.forEach(button => {
+  const key   = button.textContent.trim();
+  const limit = parseInt(button.dataset.limit, 10);
+  button.dataset.room       = key;
+  roomClickCounts[key]      = 0;
+  roomClickLimits[key]      = limit;
+
+  button.addEventListener('click', () => {
+    if (roomClickCounts[key] >= limit) return;
+    roomClickCounts[key]++;
+
+    if (roomClickCounts[key] >= limit) {
+      button.style.color           = 'Gainsboro';
+      button.style.backgroundColor = 'white';
+      button.style.borderColor     = 'white';
+    }
+
+    const parts = key.split('+').map(p => p.trim());
+
+    if (parts.length === 1) {
+      const existingCount = canvasRooms.filter(r => r.partName === parts[0]).length;
+      const instanceNum = existingCount + 1;
+      spawnRoom(parts[0], key, instanceNum);
+      refreshAllLabels(parts[0]);
+    } else {
+      const primaryPart = parts[0];
+      const existingPrimaryCount = canvasRooms.filter(r => r.partName === primaryPart).length;
+      const instanceNum = existingPrimaryCount + 1;
+      const firstRo = spawnRoom(parts[0], key, instanceNum);
+      for (let i = 1; i < parts.length; i++) {
+        const childRo = spawnRoom(parts[i], key, instanceNum);
+        addConnection(firstRo.id, childRo.id);
+      }
+      parts.forEach(p => refreshAllLabels(p));
+    }
+  });
+});
+
+// ─── SAVE ──────────────────────────────────────────────────────
+document.getElementById('save-btn').addEventListener('click', () => {
+  const fileName = 'floorplan.zoning';
+  const fr = canvasRooms[0];
+  const fc = canvasConnections[0];
+  const data = {
+    v : 1,
+    s : { ...settings },
+    rc: roomIdCounter,
+    cc: connIdCounter,
+    fill  : fr ? fr.fillColor   : '#D3D3D3',
+    stroke: fr ? fr.strokeColor : STROKE_COLOR,
+    text  : fr ? fr.textColor   : '#333',
+    line  : fc ? fc.lineColor   : STROKE_COLOR,
+    rooms: canvasRooms.map(r => ({
+      id: r.id,
+      n : r.name,
+      bn: r.baseName,
+      pn: r.partName,
+      in: r.instanceNum,
+      x : Math.round(r.x),
+      y : Math.round(r.y),
+      a : r.area !== undefined ? r.area : 10
+    })),
+    conns: canvasConnections.map(c => ({
+      id: c.id,
+      f : c.from,
+      t : c.to
+    }))
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ─── LOAD ──────────────────────────────────────────────────────
+document.getElementById('load-btn').addEventListener('click', () => {
+  if (!confirm('Do you want to load a new zoning file?')) return;
+  document.getElementById('load-input').value = '';
+  document.getElementById('load-input').click();
+});
+
+document.getElementById('load-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      loadConnectionsData(data, file.name);
+    } catch (err) {
+      alert('Could not load file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+// ─── SHARED LOAD LOGIC (used by both the file picker and Examples) ──
+function loadConnectionsData(data, displayName) {
+      if (!data.rooms || !data.conns) throw new Error('Invalid file format');
+
+      fullReset();
+
+      if (data.s) {
+        Object.assign(settings, data.s);
+        syncSettingsUI();
+      }
+
+      roomIdCounter = data.rc || 0;
+      connIdCounter = data.cc || 0;
+
+      const fillColor   = data.fill   || '#D3D3D3';
+      const strokeColor = data.stroke || STROKE_COLOR;
+      const textColor   = data.text   || '#333';
+      const lineColor   = data.line   || STROKE_COLOR;
+
+      data.rooms.forEach(saved => loadRoomDirect(saved, fillColor, strokeColor, textColor));
+
+      const byCounts = {};
+      data.rooms.forEach(saved => {
+        if (!byCounts[saved.bn]) byCounts[saved.bn] = new Set();
+        byCounts[saved.bn].add(saved.in);
+      });
+      Object.entries(byCounts).forEach(([key, set]) => {
+        roomClickCounts[key] = set.size;
+      });
+
+      roomButtons.forEach(b => {
+        const key = b.dataset.room;
+        if ((roomClickCounts[key] || 0) >= roomClickLimits[key]) {
+          b.style.color           = 'Gainsboro';
+          b.style.backgroundColor = 'white';
+          b.style.borderColor     = 'white';
+        }
+      });
+
+      data.conns.forEach(saved => {
+        const a = canvasRooms.find(r => r.id === saved.f);
+        const b = canvasRooms.find(r => r.id === saved.t);
+        if (!a || !b) return;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+        line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+        line.setAttribute('stroke',         lineColor);
+        line.setAttribute('stroke-width',   settings.lineThickness);
+        line.setAttribute('stroke-linecap', 'round');
+        line.setAttribute('id', saved.id);
+        line.style.cursor = 'grab';
+        const conn = { id: saved.id, from: saved.f, to: saved.t, lineColor, el: line };
+        connectionsLayer.appendChild(line);
+        canvasConnections.push(conn);
+        line.addEventListener('click', ev => {
+          if (mode !== 'delete') return;
+          ev.stopPropagation();
+          deleteConnection(conn);
+        });
+        line.addEventListener('touchend', ev => {
+          if (mode !== 'delete') return;
+          ev.preventDefault();
+          ev.stopPropagation();
+          deleteConnection(conn);
+        });
+      });
+
+      document.getElementById('zoning-filename').textContent = ' [' + displayName + ']';
+
+      setTimeout(() => document.getElementById('zoom-fit-btn').click(), 50);
+      updateGenerateBtn();
+}
+
+// ─── EXAMPLES (loaded from a GitHub folder) ─────────────────────
+const EXAMPLES_GITHUB_OWNER  = 'antonthom999';
+const EXAMPLES_GITHUB_REPO   = 'connections-examples';
+const EXAMPLES_GITHUB_PATH   = '';           // '' = repo root, or e.g. 'examples' for a subfolder
+const EXAMPLES_GITHUB_BRANCH = 'main';       // or 'master'
+
+const exgBtn      = document.getElementById('exgbtn');
+const exgDropdown = document.getElementById('examples-dropdown');
+let examplesLoaded = false;
+
+function examplesApiUrl() {
+  const base = `https://api.github.com/repos/${EXAMPLES_GITHUB_OWNER}/${EXAMPLES_GITHUB_REPO}/contents`;
+  const path = EXAMPLES_GITHUB_PATH ? `/${EXAMPLES_GITHUB_PATH}` : '';
+  return `${base}${path}?ref=${EXAMPLES_GITHUB_BRANCH}`;
+}
+
+async function populateExamplesDropdown() {
+  exgDropdown.innerHTML = '<div class="examples-item examples-loading">Loading…</div>';
+  try {
+    const res = await fetch(examplesApiUrl());
+    if (!res.ok) throw new Error('GitHub API error (' + res.status + ')');
+    const files = await res.json();
+    const items = (Array.isArray(files) ? files : [])
+      .filter(f => f.type === 'file' && f.name.toLowerCase().endsWith('.zoning'))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (items.length === 0) {
+      exgDropdown.innerHTML = '<div class="examples-item examples-empty">No examples found</div>';
+      return;
+    }
+
+    exgDropdown.innerHTML = '';
+    items.forEach(f => {
+      const btn = document.createElement('button');
+      btn.className = 'examples-item';
+      btn.textContent = f.name.replace(/\.zoning$/i, '');
+      btn.title = f.name;
+      btn.addEventListener('click', () => loadExampleFile(f));
+      exgDropdown.appendChild(btn);
+    });
+    examplesLoaded = true;
+  } catch (err) {
+    exgDropdown.innerHTML = '<div class="examples-item examples-empty">Could not load examples</div>';
+    console.error('Examples load error:', err);
+  }
+}
+
+async function loadExampleFile(fileMeta) {
+  exgDropdown.classList.remove('open');
+  try {
+    const res = await fetch(fileMeta.download_url);
+    if (!res.ok) throw new Error('Could not download ' + fileMeta.name);
+    const data = await res.json();
+    loadConnectionsData(data, fileMeta.name);
+  } catch (err) {
+    alert('Could not load example: ' + err.message);
+  }
+}
+
+exgBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const willOpen = !exgDropdown.classList.contains('open');
+  exgDropdown.classList.toggle('open', willOpen);
+  if (willOpen && !examplesLoaded) populateExamplesDropdown();
+});
+document.addEventListener('click', e => {
+  if (!exgDropdown.contains(e.target) && e.target !== exgBtn) {
+    exgDropdown.classList.remove('open');
+  }
+});
+
+// ─── SETTINGS PANEL ────────────────────────────────────────────
+const settingsBtn   = document.getElementById('settings-btn');
+const settingsPanel = document.getElementById('settings-panel');
+
+settingsBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  settingsPanel.classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+    settingsPanel.classList.remove('open');
+  }
+});
+
+function makeSlider(sliderId, valId, settingKey, onUpdate) {
+  const slider = document.getElementById(sliderId);
+  const valEl  = document.getElementById(valId);
+  slider.addEventListener('input', () => {
+    const v = parseInt(slider.value, 10);
+    valEl.textContent = v;
+    settings[settingKey] = v;
+    onUpdate(v);
+  });
+}
+
+function syncSettingsUI() {
+  document.getElementById('s-circle-size').value   = settings.circleRadius;
+  document.getElementById('v-circle-size').textContent = settings.circleRadius;
+  document.getElementById('s-circle-stroke').value  = settings.circleStroke;
+  document.getElementById('v-circle-stroke').textContent = settings.circleStroke;
+  document.getElementById('s-line-thick').value     = settings.lineThickness;
+  document.getElementById('v-line-thick').textContent = settings.lineThickness;
+  document.getElementById('s-font-size').value      = settings.fontSize;
+  document.getElementById('v-font-size').textContent = settings.fontSize;
+  document.getElementById('s-show-area').checked    = settings.showArea;
+}
+
+makeSlider('s-circle-size', 'v-circle-size', 'circleRadius', v => {
+  canvasRooms.forEach(ro => {
+    ro.r = Math.max(20, Math.round(v * Math.sqrt((ro.area !== undefined ? ro.area : 10) / 10)));
+    ro.circle.setAttribute('r', ro.r);
+  });
+});
+
+makeSlider('s-circle-stroke', 'v-circle-stroke', 'circleStroke', v => {
+  canvasRooms.forEach(ro => {
+    ro.circle.setAttribute('stroke-width', v);
+  });
+  if (connectFirstCircle) {
+    connectFirstCircle.setAttribute('stroke-width', STROKE_ACTIVE());
+  }
+});
+
+makeSlider('s-line-thick', 'v-line-thick', 'lineThickness', v => {
+  canvasConnections.forEach(c => {
+    c.el.setAttribute('stroke-width', v);
+  });
+});
+
+makeSlider('s-font-size', 'v-font-size', 'fontSize', () => {
+  canvasRooms.forEach(ro => {
+    updateRoomLabel(ro);
+  });
+});
+
+document.getElementById('s-show-area').addEventListener('change', e => {
+  settings.showArea = e.target.checked;
+  canvasRooms.forEach(ro => updateRoomLabel(ro));
+});
+
+document.getElementById('btn12').addEventListener('click', function() {
+  window.open('help.html', '_blank');
+});
+
+
+// ─── TITLE LINK ────────────────────────────────────────────────
+document.getElementById('title-link').addEventListener('click', e => {
+  if (!confirm('Are you sure you want to leave the selection page?')) e.preventDefault();
+});
+
+// ─── GENERATE BUTTON VALIDATION ────────────────────────────────
+function validateGenerate() {
+  const reasons = [];
+
+  if (canvasRooms.length > 1) {
+    // 1. Check for isolated rooms (no connections at all)
+    const connected = new Set();
+    canvasConnections.forEach(c => { connected.add(c.from); connected.add(c.to); });
+    const isolated = canvasRooms.filter(r => !connected.has(r.id));
+    if (isolated.length > 0) {
+      const names = isolated.map(r => r.name).join(', ');
+      reasons.push('Unconnected room' + (isolated.length > 1 ? 's' : '') + ': ' + names);
+    }
+
+    // 2. Build adjacency list (shared by checks 2 and 3)
+    const adj = {};
+    canvasRooms.forEach(r => { adj[r.id] = []; });
+    canvasConnections.forEach(c => {
+      adj[c.from].push(c.to);
+      adj[c.to].push(c.from);
+    });
+
+    // 2. Check for cycles (circular connections) using DFS on undirected graph
+    const visited = new Set();
+    let cycleFound = false;
+    function dfs(nodeId, parentId) {
+      visited.add(nodeId);
+      for (const neighborId of adj[nodeId]) {
+        if (!visited.has(neighborId)) {
+          if (dfs(neighborId, nodeId)) return true;
+        } else if (neighborId !== parentId) {
+          return true;
+        }
+      }
+      return false;
+    }
+    for (const r of canvasRooms) {
+      if (!visited.has(r.id)) {
+        if (dfs(r.id, null)) { cycleFound = true; break; }
+      }
+    }
+    if (cycleFound) reasons.push('Circular connections detected');
+
+    // 3. Check for isolated groups (graph must be a single connected component)
+    const reachable = new Set();
+    const queue = [canvasRooms[0].id];
+    reachable.add(canvasRooms[0].id);
+    while (queue.length) {
+      const nodeId = queue.shift();
+      for (const neighborId of (adj[nodeId] || [])) {
+        if (!reachable.has(neighborId)) {
+          reachable.add(neighborId);
+          queue.push(neighborId);
+        }
+      }
+    }
+    if (reachable.size < canvasRooms.length) {
+      reasons.push('Isolated room groups detected');
+    }
+  }
+
+  return reasons;
+}
+
+function updateGenerateBtn() {
+  const btn     = document.getElementById('btn1');
+  const tooltip = document.getElementById('btn1-tooltip');
+  const reasons = validateGenerate();
+  if (reasons.length > 0) {
+    btn.classList.add('generate-disabled');
+    tooltip.textContent = reasons.join('\n');
+    tooltip.classList.add('visible');
+  } else {
+    btn.classList.remove('generate-disabled');
+    tooltip.textContent = '';
+    tooltip.classList.remove('visible');
+  }
+}
+
+// ─── GENERATE ──────────────────────────────────────────────────
+document.getElementById('btn1').addEventListener('click', () => {
+  if (document.getElementById('btn1').classList.contains('generate-disabled')) return;
+  document.getElementById('btn1').classList.add('clicked');
+
+  // Full room data for Page 3
+  const p3Rooms = canvasRooms.map(r => ({
+    id         : r.id,
+    name       : r.name,
+    area       : r.area !== undefined ? r.area : 10
+  }));
+
+  // Full connection data for Page 3
+  const p3Conns = canvasConnections.map(c => ({
+    id       : c.id,
+    from     : c.from,
+    to       : c.to
+  }));
+
+  localStorage.setItem('p3_rooms', JSON.stringify(p3Rooms));
+  localStorage.setItem('p3_conns', JSON.stringify(p3Conns));
+
+  // Legacy key — kept for backward compatibility
+  const counts = {};
+  canvasRooms.forEach(r => counts[r.name] = (counts[r.name] || 0) + 1);
+  localStorage.setItem('selectedRooms', JSON.stringify(
+    Object.entries(counts).map(([room, count]) => ({ room, count }))
+  ));
+
+  window.open('plan.html', '_blank');
+});
+</script>
+
+</body>
+</html>
