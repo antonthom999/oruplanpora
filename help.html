@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Oruplanpora Help</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&display=swap" rel="stylesheet" />
+  <style>
+    *, body, html { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; background: #fff; }
+
+
+    .title { padding: 0 20px; font-size: 40px; font-weight: bold; color: black; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: 'Give You Glory', cursive; }
+
+
+    .subtitle { text-align: left; font-size: clamp(14px, 3vw, 20px); color: #3f3f3f; padding: 20px 20px 5px 100px; user-select: none; }
+
+    .btn-wrap { display: flex; justify-content: center; padding: 8px; }
+    .btn { padding: 18px 24px; font-size: clamp(15px, 3vw, 20px); border: 2px solid #d3d3d3; border-radius: 15px; background: #fff; color: #696969; cursor: pointer; transition: all 0.8s ease; user-select: none; }
+    .btn:hover { border-color: #fff; color: #000; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    .btn:active, .btn.clicked { background: #000; border-color: #000; color: #fff; transition: all 0.1s ease; }
+    .version { text-align: center; color: #d3d3d3; font-size: 13px; padding: 8px 0 16px; user-select: none; }
+    * {-webkit-tap-highlight-color: transparent;}
+  </style>
+</head>
+<body>
+
+  <div class="title" id="titleLink" style="cursor: pointer;">Oruplanpora</div>
+  <div class="subtitle">Hi all, this is the help page. We are still adding and deleting stuff here.</div>
+
+  <p style="font-size: clamp(14px, 3vw, 20px); color: #3f3f3f; padding: 0 100px; white-space: pre-line;">
+<strong>Rotating an object</strong> - Select an object, press space.
+<strong>Copy objects/rooms </strong>- Ctrl C and Ctrl V works most of the time.
+<strong>Insert from another project </strong>- insert button lets you insert an entire project into the current one.
+<strong>Room Renaming </strong>- rooms can be renamed from the Room properties button. But then 'Generating new' might fall back to original name. 
+  </p>
+
+  <p style="font-size: clamp(14px, 3vw, 20px); color: #3f3f3f;  padding: 0 100px; white-space: pre-line;">
+<strong>Can i add any png/image from internet into the current file?</strong>
+Yes you can, if you have its link. In the current file, create copy of an object. If you dont have any object, drag in one from the library. Then inside its properties, change the url to your image link. Adjust the sizes as you like.  If you can right click over any image in internet and 'open the image in a new tab', then you should be able to add it in without much hastle.
+
+<strong>Can i create my own object library?</strong>
+Yes, you can. Upload all images you like (textures/pngs etc) in an image hosting site, which allows getting image links. Currently all my images(pngs) are in tumbler. Open a new file, load all images into the current file, using the method explained in previous question. You can use this as a library. 
+
+<strong>Can i copy/import stuff from another file?</strong>
+Yes, you can. Use the 'insert contents' button, to import a file totally into the current project. The new plan will get inserted 25' below the current plan.
+
+<strong>Can i add an image from the local computer?</strong>
+Sorry no. The idea was to keep the file size to a bare minimum (in the range of kb). 
+
+<strong>Can i save the file locally?</strong>
+Yes, you can. click on save button. You can also open a previously saved local file. 
+
+<strong>When i open a previously saved file, there are no textures/objects.</strong>
+Check your internet. Internet is required for the object/images/textures to load up.
+
+<strong>When i click on library, its blank, why?</strong>
+Check your internet. Library might take a bit of time to load from internet.
+
+<strong>Can i adjust/remove the shadows?</strong>
+Yes. General Settings. Object Shadow. Opacity and Spread.
+
+<strong>Can i add more data/parameters on each of the objects?</strong>
+Yes, Library settings lets you add any number of parameters you like. This would apply to all objects. Data types can be text, number, integer, length, currency, yes/no and URL.
+
+<strong>How can i change my room flooring?</strong>
+Select a room. Click 'Room Properties' button. Paste the image link below the 'Paste image URL here'. You can find links to the architectural flooring materials from the Architextures links, right below the tile sizes. If you found an image in the internet, which you wish to put as the room flooring, check if you can right click on it and open the image in a new tab. If yes, you should also be able to copy the image link (for pasting in the room properties).
+
+<strong>How can i get high clarity/resolution images of my plans?</strong>
+To get high resolution on desktop site, zoom out in website (move out of the canvas space, then press ctrl minus). The more you zoom out, then more clarity image you get,  then click zoom to ﬁt, then click save image. We will make a small video demo on this. 
+
+<strong>How can i get this as an autocad/revit file/sketchup?</strong>
+We are working on this. Currently we are thinking in the direction of - creating a python shell script (so you too edit/add) which can directly open/import the oruplanpora file into revit. Any suggetions are welcome.
+
+
+
+
+We are working on sample projects, which you may download, modify, etc.
+
+We are also working on creating libraries with new stuff. 
+
+Let me know what else you need in future for Oruplanpora.
+
+
+
+
+  </p>
+
+
+  <script>
+    document.getElementById('titleLink').addEventListener('click', function() {
+      window.location.href = 'index.html';
+    });
+  </script>
+
+</body>
+</html>
