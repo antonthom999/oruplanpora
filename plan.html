@@ -322,46 +322,28 @@
   </div>
 
   <script>
-    const API_URL = "https://oruplanporabackend.vercel.app/generate";
 
     let showAssets = false;
     const imageCache = {}; // to preload images
 
+
+    const API_URL = "https://plasetorabackend.vercel.app/generate";
+
     var roomcount = 0;
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       const storedRooms = localStorage.getItem('p3_rooms');
       const storedConns = localStorage.getItem('p3_conns');
-
       if (storedRooms) {
         const p3Rooms = JSON.parse(storedRooms);
         const p3Conns = storedConns ? JSON.parse(storedConns) : [];
-        console.log('p3_rooms:', p3Rooms, 'p3_conns:', p3Conns);
         const listElement = document.getElementById('selectedRoomsList');
-        const roomNames = [];
 
         p3Rooms.forEach(room => {
           const li = document.createElement('li');
           li.textContent = room.name;
           listElement.appendChild(li);
-          roomNames.push(room.name);
           roomcount = roomcount + 1;
         });
-            
-
-        try {
-          const res = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rooms: p3Rooms, conns: p3Conns })
-          });
-          if (!res.ok) throw new Error(`Server responded ${res.status}`);
-          const data = await res.json();
-          boxes = data.boxes || [];
-        } catch (err) {
-          console.error('Failed to fetch floor plan from API:', err);
-          alert('Could not reach the floor plan server. Please try again later.');
-        }
-
 
         const roomCategories = [
             {
@@ -407,28 +389,42 @@
         const slnk = "https://cdn.architextures.org/textures";
         const defaultLink = 'https://cdn.architextures.org/textures/22/03/ash-herringbone-6233ee7ceb967-1200.jpg';
 
-        for (let i = 0; i < roomcount; i++) {
-            const currentName = roomNames[i].toLowerCase();
-            let selectedImage = defaultLink;
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rooms: p3Rooms, conns: p3Conns })
+          });
+          if (!res.ok) throw new Error(`Server responded ${res.status}`);
+          const data = await res.json();
+          const generatedBoxes = data.boxes || [];
 
-            const match = roomCategories.find(cat => 
-                cat.names.some(name => currentName.includes(name))
-            );
+          generatedBoxes.forEach(gb => {
+              const currentName = (gb.name || '').toLowerCase();
+              let selectedImage = defaultLink;
 
-            if (match) {
-                const randomImg = match.images[Math.floor(Math.random() * match.images.length)];
-                selectedImage = slnk + randomImg;
-            }
+              const match = roomCategories.find(cat =>
+                  cat.names.some(name => currentName.includes(name))
+              );
 
-            boxes.push({
-                name: roomNames[i],
-                x: Math.floor(Math.random() * 20) * GRID_SIZE,
-                y: Math.floor(Math.random() * 20) * GRID_SIZE,
-                width: Math.floor((200 + Math.random() * 400) / GRID_SIZE) * GRID_SIZE,
-                height: Math.floor((200 + Math.random() * 400) / GRID_SIZE) * GRID_SIZE,
-                color: "rgba(230, 230, 230, 1)",
-                imageName: selectedImage
-            });
+              if (match) {
+                  const randomImg = match.images[Math.floor(Math.random() * match.images.length)];
+                  selectedImage = slnk + randomImg;
+              }
+
+              boxes.push({
+                  name: gb.name,
+                  x: gb.x,
+                  y: gb.y,
+                  width: gb.width,
+                  height: gb.height,
+                  color: "rgba(230, 230, 230, 1)",
+                  imageName: selectedImage
+              });
+          });
+        } catch (err) {
+          console.error('Failed to fetch floor plan from API:', err);
+          alert('Could not reach the floor plan server. Please try again later.');
         }
 
       }
