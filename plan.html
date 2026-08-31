@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Placeholder</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&display=swap" rel="stylesheet" />
+
+  <style>
+    body { margin: 0; font-family: 'Roboto', sans-serif; background: #fff; overflow: hidden; /* from arena.html */ user-select: none; }
+
+    .header { display: flex; flex-wrap: wrap; align-items: flex-start; padding: 0; background: #fff; }
+    .file-name-display { margin-left: auto; padding: 10px; font-size: 20px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
+    .title { padding: 0 20px; font-size: 40px; font-weight: bold; color: black; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-family: 'Give You Glory', cursive; }
+    .title a { text-decoration: none; color: inherit; }
+    .button-container { display: flex; flex-wrap: wrap; gap: 5px; padding: 5px; background: #fff; }
+
+    .common-btn { padding: 7px; font-size: 20px; height: 40px; border: 2px solid #d3d3d3; border-radius: 15px; background: #fff; color: #696969; cursor: pointer; transition: all 0.2s ease; outline: none; flex-shrink: 1; user-select: none; }
+
+    .common-btn:hover { /* border-color: #696969; */ background: #e0e0e0; /* background: #696969; */ /* color: #fff; */ }
+    .common-btn:active, .common-btn.clicked { border-color: black; background: black; color: #fff; }
+    .common-btn:disabled { cursor: not-allowed; pointer-events: none; }
+    .tooltip-container { position: relative; display: inline-block; }
+
+    .tooltip-text { visibility: hidden; background: black; color: white; border-radius: 10px; padding: 8px; position: absolute; top: 45px; left: 0; box-shadow: 0 8px 16px rgba(2, 2, 2, 0.2); opacity: 0; font-size: 14px; max-width: 250px; word-wrap: break-word; /* transition: opacity 0.5s ease, visibility 0s linear 0.5s; */ pointer-events: none; line-height: 1.3; z-index: 9999; }
+
+    .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; /* transition-delay: 0.2s; */ }
+    .dropdown-container { position: relative; display: inline-block; font-size: 14px; }
+
+    .dropdown-panel { box-shadow: 0 8px 16px rgba(2, 2, 2, 0.2); display: none; position: absolute; top: 45px; right: 0; background-color: black; color: white; padding: 8px; border-radius: 10px; z-index: 1; width: 260px; }
+
+    .dropdown-container.open .dropdown-panel { display: block; }
+    .switch { display: flex; align-items: center; margin-top: 5px; }
+    .switch input { display: none; }
+    .slider { width: 30px; height: 15px; background-color: grey; border-radius: 15px; position: relative; margin-right: 5px; cursor: pointer; transition: background-color 0.2s; }
+    input:checked + .slider { background-color: #4CAF50; }
+    input::placeholder { color: black; opacity: 1; }
+    .slider::before { content: ""; position: absolute; width: 13px; height: 13px; left: 1px; bottom: 1px; background-color: white; border-radius: 50%; transition: transform 0.2s; }
+    input:checked + .slider::before { transform: translateX(15px); }
+    .button-group { display: inline-flex; gap: 6px; margin-left: 0px; }
+
+    .button-group button { padding: 7px; font-size: 20px; height: 40px; border: 2px solid #212121; border-radius: 15px; background: white; color: black; cursor: pointer; transition: all 0.2s ease; outline: none; flex-shrink: 1; user-select: none; }
+
+    .button-group input[type="text"] { padding: 7px; font-size: 15px; height: 40px; border: 2px solid black; border-radius: 5px; background: white; color: black; outline: none; flex-shrink: 1; user-select: none; width: 50px; /* Optional fixed width */ box-sizing: border-box; }
+
+    #content { flex: 1; display: flex; flex-wrap: wrap; height: calc(100vh - 50px); }
+    #canvas-container { flex: 1 1 auto; min-width: 300px; position: relative; }
+    #canvas { display: block; width: 100%; height: 100%; background-color: white; cursor: default; }
+    #adSpace { width: 300px; min-width: 300px; max-width: 300px; background: Whitesmoke; flex: 0 0 300px; min-height: 500px;}
+
+
+    .lib-reset-btn { margin-top: 5px; padding: 4px 10px; border-radius: 5px; border: 1px solid #888; background: #333; color: #ddd; cursor: pointer; font-size: 12px; width: 100%; }
+    .lib-reset-btn:hover { background: #555; }
+
+    .param-section-title { font-size: 14px; color: white; margin: 10px 0 5px;  }
+    .param-list { display: flex; flex-direction: column; gap: 3px; max-height: 480px; overflow-y: auto; }
+    .param-row { display: flex; align-items: center; gap: 4px; font-size: 14px; }
+    .param-row-name { flex: 1; color: #eee; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .param-type-badge { font-size: 14px; color: #999; background: #333; padding: 1px 5px; border-radius: 3px; border: 1px solid #555; white-space: nowrap; }
+    .param-builtin-tag { font-size: 14px; color: #666; padding: 1px 5px; }
+    .param-del-btn { background: none; border: none; color: #f99; cursor: pointer; font-size: 14px; padding: 0 2px; line-height: 1; flex-shrink: 0; margin-left: 9px; }
+    .param-del-btn:hover { color: #f44; }
+    .param-add-row { display: flex; align-items: center; gap: 4px; margin-top: 7px; }
+    .param-add-input { flex: 1; padding: 4px 5px; border-radius: 4px; border: 1px solid #555; background: #1a1a1a; color: white; font-size: 14px; min-width: 0; }
+    .param-add-select { padding: 4px 3px; border-radius: 4px; border: 1px solid #555; background: #1a1a1a; color: white; font-size: 11px; }
+    .param-add-btn { padding: 4px 8px; border-radius: 4px; border: 1px solid #888; background: #333; color: white; cursor: pointer; font-size: 13px; font-weight: bold; flex-shrink: 0; }
+    .param-add-btn:hover { background: #555; }
+
+    #objectSettingsPanel { min-width: 220px; max-height: 420px; overflow-y: auto; }
+    .obj-panel-name { font-size: 14px; font-weight: bold; color: #eee; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #444; word-break: break-all; }
+    .obj-param-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+    .obj-param-label { font-size: 14px; color: white; flex: 0 0 85px; text-align: right; }
+    .obj-param-input { flex: 1; padding: 3px 6px; border-radius: 4px; border: 1px solid #555; background: #1a1a1a; color: white; font-size: 14px; min-width: 0; }
+    .obj-param-input:focus { outline: none; border-color: #888; }
+    .obj-param-computed { flex: 1; font-size: 14px; color: white; padding: 3px 0;  }
+    .obj-param-checkbox { width: 16px; height: 16px; cursor: pointer; }
+
+    #canvas { touch-action: none; } 
+    * {-webkit-tap-highlight-color: transparent;}
+
+    @media screen and (max-width: 600px) {
+      body {overflow: auto;}
+    }
+
+
+
+    }
+  </style>
+</head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<body>
+
+<script>
+  let SHADOW_SETTINGS = { opacity: 1, spread: 90, offset: 0, color: "0, 0, 0" };
+  document.addEventListener('DOMContentLoaded', function () {
+    const iwallData = localStorage.getItem('iwallData');
+    const ewallData = localStorage.getItem('ewallData');
+
+
+    if (iwallData !== null) {
+      document.getElementById('iwallData').value = iwallData;
+    }
+
+    if (ewallData !== null) {
+      document.getElementById('ewallData').value = ewallData;
+    }
+  });
+
+  function saveToLocalStorage(id) {
+    const value = document.getElementById(id).value;
+    localStorage.setItem(id, value);
+  }
+</script>
+
+
+
+  <header class="header">
+    <div class="title">
+      <a id="title-link" href="index.html">Oruplanpora</a>
+    </div>
+
+    <nav class="button-container">
+      <div class="tooltip-container"><button id="btnback" class="common-btn"><i class="fa-solid fa-plus"></i></button><span class="tooltip-text">Create New Zoning.<br><br> Back to room selection page</span></div>
+      <div class="tooltip-container"><button id="btnopenfile" class="common-btn"><i class="fa-regular fa-folder-open"></i></button><input type="file" id="fileLoader" accept=".json,.plantora" style="display: none;" /><span class="tooltip-text">Open file</span></div>
+      <div class="tooltip-container"><button id="btnsave" class="common-btn"><i class="fa-regular fa-floppy-disk"></i></button><span class="tooltip-text">Save file</span></div>
+      <div class="tooltip-container"><button id="btnim" class="common-btn"><i class="fa-regular fa-image"></i></button><span class="tooltip-text" style="width: 250px;">Save image. <br><br>To get high resolution on desktop site, zoom out in website, then click zoom to fit, then click save image <br><br> This is tricky if you are in mobile device, but its possible</span></div>
+      <div class="tooltip-container"><button id="zoomtofitbutton" class="common-btn">[⌕]</button><span class="tooltip-text">Zoom to Fit</span></div>
+      <div class="tooltip-container"><button id="insertbutton" class="common-btn"><i class="fa-solid fa-file-arrow-down"></i></button><input type="file" id="insertFileLoader" accept=".json,.plantora" style="display: none;" /><span class="tooltip-text" style="width: 150px;">Insert contents from another file. <br><br> Items will be inserted below the current layout</span></div>
+
+      <div class="dropdown-container">
+        <div class="tooltip-container"><button id="btn11" class="common-btn"><i class="fa-solid fa-screwdriver-wrench"></i></button><span class="tooltip-text" id="tooltip-settings">General Settings</span></div>
+
+        <div class="dropdown-panel" id="settingsPanel" style="right: auto; left: 0;">
+          <label class="switch"><input type="checkbox" id="toggle-m" checked><span class="slider"></span> Metric</label>
+          <label class="switch"><input type="checkbox" id="toggle-ft" checked><span class="slider"></span> Imperial</label>
+            <br>
+          <label class="switch"><input type="checkbox" id="toggle-roomname" checked><span class="slider"></span> Room Name</label>
+          <label class="switch"><input type="checkbox" id="toggle-roomsize" checked><span class="slider"></span> Room Size</label>
+            <br>
+
+          <label>Room Name Size:</label>
+          <input type="number" id="roomFontSize" value="30" style="width: 40px; height: 10px; padding: 5px; margin-top: 0px; margin-bottom: 5px; border-radius: 5px;" oninput="draw()">
+          <span class="unit-label">pixel</span>
+            <br>
+
+          <label class="switch"><input type="checkbox" id="toggle-grid"checked><span class="slider"></span> Grid (1ft x 1ft)</label>
+            <br>
+
+          <label>Wall Thickness:</label>
+            <br>
+          <label for="iwallData">&nbsp;&nbsp;Interior&nbsp;</label>
+          <div class="input-with-unit"style="display: inline-flex; align-items: center;">
+            <input type="number" id="iwallData" name="iwallData" value="90.00"
+                   style="width: 70px; padding: 5px; margin-top: 5px; margin-bottom: 0px; border-radius: 5px; height: 10px;"
+                   oninput="saveToLocalStorage('iwallData')">
+            <span class="unit-label"style="margin-left: 5px;">mm</span>
+          </div>
+            <br>
+          <label for="ewallData">&nbsp;&nbsp;Exterior </label>
+          <div class="input-with-unit" style="display: inline-flex; align-items: center;">
+            <input type="number" id="ewallData" name="ewallData" value="200.00"
+                   style="width: 70px; padding: 5px; margin-top: 5px; margin-bottom: 5px; border-radius: 5px; height: 10px;"
+                   step="any"
+                   oninput="saveToLocalStorage('ewallData')">
+            <span class="unit-label"style="margin-left: 5px;">mm</span>
+          </div>
+
+            <br>
+            <br>
+          <label>Object Shadow:</label>
+          <br>
+          <label>&nbsp;&nbsp;Opacity</label>
+          <input type="number" id="shadowOpacity" value="1.0" step="0.1" min="0" max="1" 
+                 style="width: 50px; height: 10px; padding: 5px; margin-top: 5px; margin-bottom: 5px; border-radius: 5px;" 
+                 oninput="updateShadows()">
+          <br>
+
+          <label>&nbsp;&nbsp;Spread</label>
+          <input type="number" id="shadowSpread" value="250" 
+                 style="width: 50px; height: 10px; padding: 5px; margin-bottom: 5px; border-radius: 5px;" 
+                 oninput="updateShadows()">
+          <span class="unit-label">pixel</span>
+
+          <br>
+
+        </div>
+
+
+      </div>
+
+      <div class="tooltip-container"><button id="btn8" class="common-btn">Generate new</button><span class="tooltip-text">Generate new layout.</span></div>
+      <div class="tooltip-container"><button id="btnvehicles" class="common-btn" style="border-radius: 15px 0 0 15px;" onclick="toggleAssetLibrary()">Library</button><span class="tooltip-text">Add openings,furniture, cars, trees. <br><br>This is getting updated. </span></div>
+      <div class="dropdown-container" id="librarySettingsContainer">
+        <div class="tooltip-container">
+          <button id="btnobjectsettings" class="common-btn" style="border-radius: 0 15px 15px 0; margin-left: -8px;"><i class="fa-solid fa-wrench"></i></button>
+          <span class="tooltip-text">Library Settings</span>
+        </div>
+        <div class="dropdown-panel" id="librarySettingsPanel" style="right: auto; left: 0;">
+          <label for="libraryInput">Add Custom Library URL:</label><br>
+          <input type="text" id="libraryInput"
+                 value="https://raw.githubusercontent.com/antonthom999/defaultlibrary/refs/heads/main/library.json"
+                 style="width: 245px; padding: 5px; margin-top: 6px; margin-bottom: 5px; border-radius: 5px; color: black;"
+                 onkeydown="if(event.key==='Enter'){ updateLibraryUrl(); this.closest('.dropdown-container').classList.remove('open'); document.getElementById('btnobjectsettings').classList.remove('clicked'); }">
+          <button class="lib-reset-btn" onclick="resetLibraryUrl()">↺ Reset to Default Library</button>
+          <br>
+          <br>
+          <div class="param-section-title">Object Parameters in this project:</div>
+          <div class="param-list" id="paramList"></div>
+          <div class="param-add-row">
+            <input class="param-add-input" id="newParamName" type="text" placeholder="Parameter name…" />
+            <select class="param-add-select" id="newParamType">
+              <option value="text">Text</option>
+              <option value="number">Number</option>
+              <option value="integer">Integer</option>
+              <option value="length">Length</option>
+              <option value="currency">Currency</option>
+              <option value="yesno">Yes/No</option>
+              <option value="url">URL</option>
+            </select>
+            <button class="param-add-btn" onclick="addCustomParam()">Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="tooltip-container"><button id="btn12" class="common-btn">?</button><span class="tooltip-text">Help</span></div>
+
+
+      <!-- Delete & Copy — shown for any selection (rooms or objects) -->
+      <div class="tooltip-container" id="btnDeleteContainer" style="display: none;">
+        <button id="btn4" class="common-btn" style="border-color: black; background-color: #ffb5b5; color: black;"><i class="fa-solid fa-xmark"></i></button>
+        <span class="tooltip-text">Delete selected</span>
+      </div>
+      <div class="tooltip-container" id="btnCopyContainer" style="display: none;">
+        <button id="btn10" class="common-btn" style="border-color: black; background-color: #ffb5b5; color: black;"><i class="fa-regular fa-clone"></i></button>
+        <span class="tooltip-text">Copy &amp; Paste selected</span>
+      </div>
+
+      <!-- Room Settings — shown only when rooms (and no objects) are selected -->
+      <div class="dropdown-container" id="roomSettingsContainer" style="display: none;">
+        <div class="tooltip-container">
+          <button id="btnImage" class="common-btn" style="border-color: black; background-color: #ffb5b5; color: black;"><i class="fa-solid fa-brush"></i></button>
+          <span class="tooltip-text">Room Properties</span>
+        </div>
+        <div class="dropdown-panel" id="imageDropdownPanel" style="right: auto; left: 0;">
+
+          <!-- Room Name Input -->
+          <label for="roomNameInput">Room Name</label><br>
+          <div style="display: flex; align-items: center; gap: 5px; margin-top: 5px; margin-bottom: 5px;">
+            <input type="text" id="roomNameInput" placeholder="Room name..." style="flex: 1; padding: 5px;">
+          </div>
+
+          <!-- Image URL Input + Buttons Row -->
+          <label for="imageUrlInput">Paste image URL here (with 'Commercial &amp; other licenses' only).</label><br>
+
+          <div style="display: flex; align-items: center; gap: 5px; margin-top: 5px; margin-bottom: 5px; ">
+            <input type="text" id="imageUrlInput" placeholder="Empty..." style="flex: 1; padding: 5px;">
+            <button id="copyLinkBtn" class="common-btn" title="Copy link" style="font-weight: bold; border-radius: 5px; height: 28px; font-size: 16px;">⿻</button>
+            <button id="deleteImageBtn" class="common-btn" title="Remove image" style="border-radius: 5px; height: 28px; font-size: 16px;">X</button>
+          </div>
+
+            <br>
+          <!-- Scale Input -->
+          <label for="imageScaleWidthInput">Tile size (W × H in ft)</label><br>
+          <div style="display: flex; align-items: center; gap: 5px; margin-top: 5px; margin-bottom: 5px;">
+            <input type="number" id="imageScaleWidthInput" placeholder="W" min="0.1" step="0.1" style="flex: 1; padding: 5px; border-radius: 5px; width: 60px;">
+            <span>×</span>
+            <input type="number" id="imageScaleHeightInput" placeholder="H" min="0.1" step="0.1" style="flex: 1; padding: 5px; border-radius: 5px; width: 60px;">
+            <span>  </span>
+            <button id="rotateImageBtn" class="common-btn" title="Rotate image 90°" style="border-radius: 5px; height: 28px; font-size: 16px; padding: 4px 10px;">↻ 90°</button>
+          </div>
+
+
+            <br>
+          <a href="https://architextures.org/about" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">Architextures Materials</a>
+          <div style="margin-top: 5px;">
+            <a href="https://architextures.org/textures/category/stone" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Stone</a>
+            <a href="https://architextures.org/textures/category/wood" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Wood</a>
+            <a href="https://architextures.org/textures/category/terrazzo" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Terrazzo</a>
+            <a href="https://architextures.org/textures/category/concrete" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Concrete</a>
+            <a href="https://architextures.org/textures/category/metal" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Metal</a>
+            <a href="https://architextures.org/textures/category/tile" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Tile</a>
+            <a href="https://architextures.org/textures/category/carpet" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Carpet</a>
+            <a href="https://architextures.org/textures/category/surfaces" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Surfaces</a>
+            <a href="https://architextures.org/textures/category/finishes" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Finishes</a>
+            <a href="https://stock.adobe.com/search?k=seamless+grass+texture" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Landscaping</a>
+            <a href="https://architextures.org/textures/category/insulation" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Insulation</a>
+            <a href="https://architextures.org/textures/category/organic" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Organic</a>
+            <a href="https://architextures.org/textures/category/acoustic" target="_blank" style="display: block; color: inherit; text-decoration: none; font: inherit; cursor: pointer;">- Acoustic</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Object Settings — shown only when objects (and no rooms) are selected -->
+      <div class="dropdown-container" id="objectSettingsContainer" style="display: none;">
+        <div class="tooltip-container">
+          <button id="btnObjectSettings" class="common-btn" style="border-color: black; background-color: #ffb5b5; color: black;"><i class="fa-solid fa-brush"></i></button>
+          <span class="tooltip-text">Object Properties</span>
+        </div>
+        <div class="dropdown-panel" id="objectSettingsPanel" style="right: auto; left: 0;">
+          <!-- Object settings populated dynamically -->
+        </div>
+      </div>
+
+
+
+    </nav>
+
+    <ul id="selectedRoomsList" style="display: none;"></ul>
+
+    <div id="fileNameDisplay" class="file-name-display"></div>
+  </header>
+
+  <div id="content">
+    <div id="adSpace"></div>
+    <div id="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://oruplanporabackend.vercel.app/generate";
+
+    let showAssets = false;
+    const imageCache = {}; // to preload images
+
+    var roomcount = 0;
+    document.addEventListener('DOMContentLoaded', () => {
+      const storedRooms = localStorage.getItem('p3_rooms');
+      const storedConns = localStorage.getItem('p3_conns');
+
+      if (storedRooms) {
+        const p3Rooms = JSON.parse(storedRooms);
+        const p3Conns = storedConns ? JSON.parse(storedConns) : [];
+        console.log('p3_rooms:', p3Rooms, 'p3_conns:', p3Conns);
+        const listElement = document.getElementById('selectedRoomsList');
+        const roomNames = [];
+
+        p3Rooms.forEach(room => {
+          const li = document.createElement('li');
+          li.textContent = room.name;
+          listElement.appendChild(li);
+          roomNames.push(room.name);
+          roomcount = roomcount + 1;
+        });
+            
+
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rooms: p3Rooms, conns: p3Conns })
+          });
+          if (!res.ok) throw new Error(`Server responded ${res.status}`);
+          const data = await res.json();
+          boxes = data.boxes || [];
+        } catch (err) {
+          console.error('Failed to fetch floor plan from API:', err);
+          alert('Could not reach the floor plan server. Please try again later.');
+        }
+
+
+        const roomCategories = [
+            {
+                names: ["garage", "parking"],
+                images: ["/24/8/inkstone-seashell-mosaic-stack-tisa-home-cb1hay.jpg", "/23/9/crazing-tile-european-fan-rlq5ne.jpg", "/24/3/granite-broken-range-ashlar-3ti6xf.jpg", "/23/10/granite-herringbone-2zwgn0.jpg"]
+            },
+            {
+                names: ["foyer", "entryway", "living", "dining", "office", "study","Family room", "passage", "staircase", "corridor", "breakfast", "prayer", "puja", "tea"],
+                images: ["/25/6/h-elegance-hanex-5b0wnv.jpg", "/25/6/cascade-beige-hanex-pgf72j.jpg", "/26/3/crema-travertine--porcelain-ct6cbv.jpg"]
+            },
+            {
+                names: ["theater", "media", "gym", "game"],
+                images: ["/21/07/sports-surfacing-60ecbeb127bed-1200.jpg", "/23/6/running-track-surfacing-none-gl8f53.jpg"]
+            },
+            {
+                names: ["bathroom", "sauna", "steam", "shower", "powder"],
+                images: ["/23/12/blue-tile-snowflake-e1gcwo.jpg", "/23/5/mustard-crazed-tile-herringbone-5atpuu.jpg", "/24/10/bee--skep--snowdrop-stack-grow-house-grow-h6mmft.jpg", "/23/1/-stack-x7uwen-1200.jpg"]
+            },
+            {
+                names: ["kitchen", "pantry", "work area" ],
+                images: ["/23/3/egat-143-none-eurogolv-z3nx37-1200.jpg", "/25/10/egat-170--qt4wmn.jpg"]
+            },
+            {
+                names: ["utility", "mudroom", "workshop", "store", "laundry"],
+                images: ["/23/3/egat-143-none-eurogolv-z3nx37-1200.jpg", "/25/10/egat-170--qt4wmn.jpg"]
+            },
+            {
+                names: ["verandah", "patio", "deck", "alfresco", "conservatory", "sunroom"],
+                images: ["/21/07/western-red-cedar-stack-60e5d53d1803f-1200.jpg"]
+            },
+            {
+                names: ["courtyard"],
+                images: ["/21/01/granite-staggered-600c4f87c8271-1200.jpg", "/23/6/sandstone-crazy-paving-nrr0vs.jpg?s=400&q=60","/23/8/perennial-ryegrass-picket-and-square-thr2w2.jpg","/24/3/blonde-sandstone-uncoursed-ashlar-ciyay6.jpg","/23/6/blonde-sandstone-crazy-paving-jmk9h0.jpg"]
+            },
+            {
+                names: ["bedroom"],
+                images: ["/20/06/oak-staggered-5ee796839d426-1200.jpg", "/20/03/douglas-fir-staggered-5e80df0caea28-1200.jpg", "/20/06/ash-herringbone-5ee799160dedc-1200.jpg"]
+            }
+
+
+        ];
+
+        const slnk = "https://cdn.architextures.org/textures";
+        const defaultLink = 'https://cdn.architextures.org/textures/22/03/ash-herringbone-6233ee7ceb967-1200.jpg';
+
+        for (let i = 0; i < roomcount; i++) {
+            const currentName = roomNames[i].toLowerCase();
+            let selectedImage = defaultLink;
+
+            const match = roomCategories.find(cat => 
+                cat.names.some(name => currentName.includes(name))
+            );
+
+            if (match) {
+                const randomImg = match.images[Math.floor(Math.random() * match.images.length)];
+                selectedImage = slnk + randomImg;
+            }
+
+            boxes.push({
+                name: roomNames[i],
+                x: Math.floor(Math.random() * 20) * GRID_SIZE,
+                y: Math.floor(Math.random() * 20) * GRID_SIZE,
+                width: Math.floor((200 + Math.random() * 400) / GRID_SIZE) * GRID_SIZE,
+                height: Math.floor((200 + Math.random() * 400) / GRID_SIZE) * GRID_SIZE,
+                color: "rgba(230, 230, 230, 1)",
+                imageName: selectedImage
+            });
+        }
+
+      }
+      zoomToFit();
+      draw();
+    });
+
+    const btnback = document.getElementById('btnback');
+    btnback.addEventListener('click', (event) => {
+      if (!confirm('Are you sure you want to go to the zoning page?')) {
+        event.preventDefault();
+      } else {
+        window.location.href = 'zoning.html';
+      }
+    });
+
+    document.getElementById('title-link').addEventListener('click', (event) => {
+      if (!confirm('Are you sure you want to go to the start page?')) {
+        event.preventDefault();
+      }
+    });
+  
+    document.getElementById('btn12').addEventListener('click', function() {
+      window.open('help.html', '_blank');
+    });
+
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const adWidth = window.innerWidth <= 700 ? 0 : 300;
+    canvas.width = window.innerWidth - adWidth;
+    canvas.height = window.innerHeight - 50;
+
+    const GRID_SIZE = 40;
+    const DEFAULT_FILL = "rgba(230, 230, 230, 1)";
+    const SELECTED_FILL = "rgba(150, 50, 50, 1)";
+
+    const ASSET_SNAP_SIZE = 20; // Objects/assets always snap to half-grid (20px)
+
+    function snapAssetToGrid(value) {
+      return Math.round(value / ASSET_SNAP_SIZE) * ASSET_SNAP_SIZE;
+    }
+    function snapAssetDeltaToGrid(delta) {
+      return Math.round(delta / ASSET_SNAP_SIZE) * ASSET_SNAP_SIZE;
+    }
+
+    let imageLibrary = [];
+    let libraryUrl = "https://raw.githubusercontent.com/antonthom999/defaultlibrary/refs/heads/main/library.json";
+    const DEFAULT_LIBRARY_URL = libraryUrl;
+
+    let objectParamDefs = [
+      { id: 'width',       label: 'Width',       type: 'length',   builtin: true  },
+      { id: 'height',      label: 'Height',      type: 'length',   builtin: true  },
+      { id: 'url',    	   label: 'URL',         type: 'url',      builtin: true  },
+      { id: 'name',    	   label: 'Name',        type: 'text',     builtin: true  },
+      { id: 'category',    label: 'Category',    type: 'text',     builtin: true  },
+      { id: 'tag',         label: 'Tag',         type: 'text',     builtin: true  },
+      { id: 'description', label: 'Description', type: 'text',     builtin: true  },
+      { id: 'madeby',      label: 'Made by',     type: 'text',     builtin: true  },
+      { id: 'model',       label: 'Model',       type: 'text',     builtin: true  },
+      { id: 'cost',        label: 'Cost',        type: 'currency', builtin: true  },
+    ];
+
+    const PARAM_TYPE_LABELS = {
+      text: 'Text', number: 'Number', integer: 'Integer',
+      length: 'Length', currency: 'Currency', yesno: 'Yes/No', url: 'URL'
+    };
+
+    function resetLibraryUrl() {
+      document.getElementById('libraryInput').value = DEFAULT_LIBRARY_URL;
+      libraryUrl = DEFAULT_LIBRARY_URL;
+      fetch(libraryUrl)
+        .then(r => r.json())
+        .then(data => { imageLibrary = data; return preloadImages(); })
+        .then(() => draw())
+        .catch(() => alert("Could not reload default library."));
+    }
+
+    function renderParamManager() {
+      const list = document.getElementById('paramList');
+      if (!list) return;
+      list.innerHTML = '';
+      objectParamDefs.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'param-row';
+        row.innerHTML = `
+          <span class="param-row-name" title="${p.label}">${p.label}</span>
+          <span class="param-type-badge">${PARAM_TYPE_LABELS[p.type] || p.type}</span>
+          ${p.builtin
+            ? `<span class="param-builtin-tag">Built-in</span>`
+            : `<button class="param-del-btn" title="Delete parameter" onclick="deleteCustomParam(${idx})">Delete</button>`
+          }`;
+        list.appendChild(row);
+      });
+    }
+
+    function addCustomParam() {
+      const nameEl = document.getElementById('newParamName');
+      const typeEl = document.getElementById('newParamType');
+      const name = nameEl.value.trim();
+      if (!name) { nameEl.focus(); return; }
+      // Unique id: lowercase alphanumeric
+      const id = 'custom_' + name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
+      objectParamDefs.push({ id, label: name, type: typeEl.value, builtin: false });
+      nameEl.value = '';
+      renderParamManager();
+      // Re-render open object panel if any
+      if (selectedPlacedAsset) renderObjectParamPanel(selectedPlacedAsset);
+    }
+
+    function deleteCustomParam(idx) {
+      if (objectParamDefs[idx].builtin) return;
+      objectParamDefs.splice(idx, 1);
+      renderParamManager();
+      if (selectedPlacedAsset) renderObjectParamPanel(selectedPlacedAsset);
+    }
+
+    function renderObjectParamPanel(asset) {
+      const panel = document.getElementById('objectSettingsPanel');
+      if (!panel) return;
+      if (!asset.params) asset.params = {};
+      panel.innerHTML = '';
+
+      const nameDiv = document.createElement('div');
+      nameDiv.className = 'obj-panel-name';
+      panel.appendChild(nameDiv);
+
+      objectParamDefs.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'obj-param-row';
+
+        const label = document.createElement('label');
+        label.className = 'obj-param-label';
+        label.textContent = p.label + ':';
+        row.appendChild(label);
+
+        if (p.id === 'width' || p.id === 'height') {
+          const val = document.createElement('span');
+          val.className = 'obj-param-computed';
+          const ft = p.id === 'width' ? asset.scale.cols : asset.scale.rows;
+          const mm = (ft * 304.8).toFixed(0);
+          val.textContent = `${mm} mm  (${ft} ft)`;
+          row.appendChild(val);
+        } else if (p.id === 'url') {
+          const inp = document.createElement('input');
+          inp.className = 'obj-param-input';
+          inp.type = 'text';
+          inp.value = asset.url || '';
+          inp.placeholder = 'https://…';
+          inp.onchange = () => {
+            const newUrl = inp.value.trim();
+            asset.url = newUrl;
+            if (newUrl && !imageCache[newUrl]) {
+              const img = new Image();
+              img.crossOrigin = "anonymous";
+              img.onload = () => { imageCache[newUrl] = img; draw(); };
+              img.onerror = () => { alert("Failed to load image from that URL."); };
+              img.src = newUrl;
+            } else {
+              draw();
+            }
+          };
+          row.appendChild(inp);
+        } else if (p.id === 'name' || p.id === 'category') {
+          const inp = document.createElement('input');
+          inp.className = 'obj-param-input';
+          inp.type = 'text';
+          inp.value = asset[p.id] || '';
+          inp.oninput = () => { asset[p.id] = inp.value; };
+          row.appendChild(inp);
+        } else if (p.type === 'yesno') {
+          const chk = document.createElement('input');
+          chk.type = 'checkbox';
+          chk.className = 'obj-param-checkbox';
+          chk.checked = asset.params[p.id] === true || asset.params[p.id] === 'true';
+          chk.onchange = () => { asset.params[p.id] = chk.checked; };
+          row.appendChild(chk);
+        } else {
+          const inp = document.createElement('input');
+          inp.className = 'obj-param-input';
+          inp.type = p.type === 'number' || p.type === 'integer' || p.type === 'length' || p.type === 'currency' ? 'number' : 'text';
+          if (p.type === 'integer') inp.step = '1';
+          if (p.type === 'length' || p.type === 'number' || p.type === 'currency') inp.step = 'any';
+          inp.value = asset.params[p.id] !== undefined ? asset.params[p.id] : '';
+          inp.placeholder = p.type === 'currency' ? '0.00' : p.type === 'url' ? 'https://…' : '';
+          inp.oninput = () => { asset.params[p.id] = inp.value; };
+          row.appendChild(inp);
+          if (p.type === 'length') {
+            const suf = document.createElement('span');
+            suf.style.cssText = 'font-size:11px;color:#888;white-space:nowrap;';
+            suf.textContent = 'mm';
+            row.appendChild(suf);
+          }
+          if (p.type === 'currency') {
+            const suf = document.createElement('span');
+            suf.style.cssText = 'font-size:11px;color:#888;white-space:nowrap;';
+            row.style.justifyContent = 'flex-end';
+            suf.style.flex = '0 0 auto';
+            row.insertBefore(suf, inp);
+          }
+        }
+
+        panel.appendChild(row);
+      });
+    }
+
+    function updateLibraryUrl() {
+        const input = document.getElementById('libraryInput');
+        const newUrl = input.value.trim();
+        if (!newUrl) return;
+        libraryUrl = newUrl;
+        console.log("Fetching new library:", libraryUrl);
+
+        fetch(libraryUrl)
+            .then(response => response.json())
+            .then(data => {
+                imageLibrary = data;
+                console.log("New library loaded:", imageLibrary);
+                return preloadImages();
+            })
+            .then(() => {
+                console.log("New library images preloaded.");
+                draw();
+            })
+            .catch(error => {
+                console.error("Failed to load library:", error);
+                alert("Could not load library from URL. Check the URL and try again.");
+            });
+    }
+
+
+
+
+    fetch(libraryUrl)
+      .then(response => response.json())
+      .then(data => {
+        imageLibrary = data; 
+        console.log("Library loaded successfully:", imageLibrary);
+    
+        return preloadImages(); 
+      })
+      .then(() => {
+          console.log("Images preloaded. Ready to draw.");
+          drawAssetLibrary(); // Call your draw function here
+      })
+      .catch(error => console.error("Error:", error));
+
+
+
+    function preloadImages() {
+        const promises = imageLibrary.map(asset => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous"; // Helps with loading from external URLs
+                img.src = asset.url;
+            
+                img.onload = () => {
+                    imageCache[asset.url] = img; 
+                    resolve();
+                };
+                img.onerror = (err) => {
+                    console.error("Failed to load image:", asset.url);
+                    resolve();
+                };
+            });
+        });
+        return Promise.all(promises);
+    }
+
+
+
+    let scaleFactor = 1;
+    let cameraOffset = { x: 0, y: 0 };
+    let boxes = [];
+    let selectedBoxes = [];
+    let selected = null;
+    let draggingSingle = false;
+    let dragOffset = { x: 0, y: 0 };
+    let draggingGroup = false;
+    let groupStartMouse = { x: 0, y: 0 };
+    let groupOriginalPositions = [];
+    let resizing = false;
+    let activeHandle = null;
+    let handles = [];
+    let panning = false;
+    let panStart = { x: 0, y: 0 };
+    let selectionBox = null;
+    let placedAssets = [];
+    let selectedPlacedAsset = null;
+    let dragPlacedOffsetX = 0;
+    let dragPlacedOffsetY = 0;
+
+    function snapToGrid(value) {
+      return Math.round(value / GRID_SIZE) * GRID_SIZE;
+    }
+
+    function snapDeltaToGrid(delta) {
+      return Math.round(delta / GRID_SIZE) * GRID_SIZE;
+    }
+
+    function updateHandles() {
+      if (!selected) return (handles = []);
+      handles = [
+        { x: selected.x + selected.width / 2, y: selected.y + (7.5 / scaleFactor), cursor: "ns-resize", side: "top" },
+        { x: selected.x + selected.width / 2, y: selected.y + selected.height - (7.5 / scaleFactor), cursor: "ns-resize", side: "bottom" },
+        { x: selected.x + (7.5 / scaleFactor), y: selected.y + selected.height / 2, cursor: "ew-resize", side: "left" },
+        { x: selected.x + selected.width - (7.5 / scaleFactor), y: selected.y + selected.height / 2, cursor: "ew-resize", side: "right" }
+      ];
+    }
+
+
+    function drawAssetLibrary() {
+        const gridOffset = 10 * GRID_SIZE;
+
+        let maxBoxRight = 0;
+        boxes.forEach(box => {
+            const right = box.x + box.width;
+            if (right > maxBoxRight) maxBoxRight = right;
+        });
+
+        const startX = maxBoxRight + gridOffset;
+        let currentY = 0;
+
+        imageLibrary.forEach(asset => {
+            const img = imageCache[asset.url]; 
+
+            if (!img) {
+                console.warn("Image not found in cache for URL:", asset.url);
+                return;
+            }
+
+            const width = asset.scale.cols * GRID_SIZE;
+            const height = asset.scale.rows * GRID_SIZE;
+    
+            const x = startX + asset.location.x * GRID_SIZE;
+            const y = asset.location.y * GRID_SIZE;
+
+            const assetcatgry = asset.category;
+            const assetname = asset.name;
+
+            ctx.drawImage(img, x, y, width, height);
+        });
+
+
+
+    }
+
+
+    function drawDraggingPreview() {
+        if (!draggingAsset) return;
+        const img = imageCache[draggingAsset.asset.url]; 
+        if (!img) return;
+        ctx.save();
+        ctx.globalAlpha = 0.5; // Make preview semi-transparent
+        const centerX = draggingAsset.x + draggingAsset.width / 2;
+        const centerY = draggingAsset.y + draggingAsset.height / 2;
+        ctx.translate(centerX, centerY);
+        ctx.rotate((draggingAsset.rotation || 0) * Math.PI / 180);
+        ctx.drawImage(img, -draggingAsset.width / 2, -draggingAsset.height / 2, draggingAsset.width, draggingAsset.height);
+        ctx.restore();
+    }
+
+
+
+
+    async function preloadImages() {
+        const promises = imageLibrary.map(asset => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => {
+                    imageCache[asset.url] = img; 
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.error("Failed:", asset.url);
+                    resolve(); // Resolve anyway to not block the whole batch
+                };
+                img.src = asset.url;
+            });
+        });
+        await Promise.all(promises);
+    }
+
+
+
+    function toggleAssetLibrary() {
+      showAssets = !showAssets;
+      const btn = document.getElementById('btnvehicles');
+      btn.classList.toggle('clicked', showAssets);
+      draw(); 
+    }
+
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.setTransform(scaleFactor, 0, 0, scaleFactor, cameraOffset.x, cameraOffset.y);
+
+
+      boxes.forEach(box => {
+        const ithicknessInput = document.getElementById("iwallData");
+        let iwallThickness = parseFloat(ithicknessInput.value) || 90;
+        const ethicknessInput = document.getElementById("ewallData");
+        let ewallThickness = parseFloat(ethicknessInput.value) || 20; // fallback if input is invalid
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = ((ewallThickness)/304.8)*80 - (iwallThickness/304.8)*40;
+        ctx.fillRect(box.x, box.y, box.width, box.height);
+        ctx.strokeRect(box.x, box.y, box.width, box.height);
+      });
+
+
+      boxes.forEach(box => {
+        const ithicknessInput = document.getElementById("iwallData");
+        let iwallThickness = parseFloat(ithicknessInput.value) || 90; // fallback if input is invalid
+        const isSel = selectedBoxes.includes(box);
+        ctx.fillStyle = DEFAULT_FILL;
+        ctx.strokeStyle = isSel ? SELECTED_FILL : "black";
+        ctx.lineWidth = (iwallThickness/304.8)*40;
+        ctx.fillRect(box.x, box.y, box.width, box.height);
+
+        drawBox(ctx, box, box.imageName)
+        if (box.imageName) applyInnerShadow(ctx, box);
+
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.globalCompositeOperation = 'source-over';
+
+        ctx.strokeStyle = isSel ? SELECTED_FILL : "black";
+        ctx.lineWidth = (iwallThickness / 304.8) * 40;
+        ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+      });
+
+
+      placedAssets.forEach(asset => {
+        if (asset._hidden) return;
+        const img = imageCache[asset.url];
+        if (!img) return;
+
+        const width = asset.scale.cols * GRID_SIZE;
+        const height = asset.scale.rows * GRID_SIZE;
+
+        ctx.save();
+        ctx.translate(asset.x + width / 2, asset.y + height / 2);
+        ctx.rotate((asset.rotation || 0) * Math.PI / 180);
+
+        ctx.shadowColor = `rgba(${SHADOW_SETTINGS.color}, ${SHADOW_SETTINGS.opacity})`;
+        ctx.shadowBlur = SHADOW_SETTINGS.spread * scaleFactor;
+        ctx.shadowOffsetX = SHADOW_SETTINGS.offset;
+        ctx.shadowOffsetY = SHADOW_SETTINGS.offset;
+
+        ctx.drawImage(img, -width / 2, -height / 2, width, height);
+        ctx.shadowColor = "transparent";
+
+        // Red selection outline
+        if (selectedPlacedAssets.includes(asset)) {
+          ctx.strokeStyle = "rgba(150, 50, 50, 1)";
+          ctx.lineWidth = 13;
+          ctx.strokeRect(-width / 2, -height / 2, width, height);
+        }
+        ctx.restore();
+      });
+
+      {
+        const _fontSize     = parseInt(document.getElementById("roomFontSize").value) || 30;
+        const _sizeFontSize = 20;
+        const _lineGap      = 6;
+        const _roomname     = document.getElementById("toggle-roomname");
+        const _roomsize     = document.getElementById("toggle-roomsize");
+        const _metric       = document.getElementById("toggle-m");
+        const _imperial     = document.getElementById("toggle-ft");
+
+        boxes.forEach(box => {
+          const cx = box.x + box.width / 2;
+          const cy = box.y + box.height / 2;
+          const lines = [];
+          if (_roomname.checked) {
+              lines.push({ text: box.name, fs: _fontSize });
+          }
+          if (_roomsize.checked) {
+              const wm = (box.width  / (GRID_SIZE * 3.281)).toFixed(1);
+              const hm = (box.height / (GRID_SIZE * 3.281)).toFixed(1);
+              if (_metric.checked)   lines.push({ text: `${wm}m x ${hm}m`, fs: _sizeFontSize });
+              if (_imperial.checked) lines.push({ text: `${box.width / GRID_SIZE}' x ${box.height / GRID_SIZE}'`, fs: _sizeFontSize });
+          }
+          if (lines.length === 0) return;
+          const totalH = lines.reduce((sum, l, i) => sum + l.fs + (i < lines.length - 1 ? _lineGap : 0), 0);
+          let lineY = cy - totalH / 2;
+          ctx.fillStyle = "black";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          lines.forEach(line => {
+              ctx.font = `${line.fs}px Arial`;
+              ctx.fillText(line.text, cx, lineY);
+              lineY += line.fs + _lineGap;
+          });
+        });
+      }
+
+      drawGrid();
+
+      if (selectedBoxes.length === 1 && selectedPlacedAssets.length === 0) {
+        selected = selectedBoxes[0];
+        updateHandles();
+        ctx.fillStyle = "rgba(230, 230, 230, 1)";
+        handles.forEach(h => {
+          ctx.beginPath();
+          ctx.lineWidth = 1 / scaleFactor;
+          ctx.arc(h.x, h.y, 15 / scaleFactor, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(150, 150, 150, 1)';
+          ctx.stroke();
+        });
+
+      } else {
+        selected = null;
+      }
+
+      if (selectedPlacedAssets.length === 1 && selectedPlacedAsset && selectedBoxes.length === 0) {
+        updatePlacedAssetHandles();
+        ctx.fillStyle = "rgba(230, 230, 230, 1)";
+        placedAssetHandles.forEach(h => {
+          ctx.beginPath();
+          ctx.lineWidth = 1 / scaleFactor;
+          ctx.arc(h.x, h.y, 15 / scaleFactor, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(150, 150, 150, 1)';
+          ctx.stroke();
+        });
+      }
+
+      if (showAssets) {
+        drawAssetLibrary();
+      }
+      drawDraggingPreview();
+      ctx.restore();
+
+      if (selectionBox) {
+        ctx.save();
+        ctx.setTransform(scaleFactor, 0, 0, scaleFactor, cameraOffset.x, cameraOffset.y);
+        ctx.strokeStyle = 'rgba(0, 0, 0, 1)';
+        ctx.lineWidth = 2 / scaleFactor;
+        ctx.setLineDash([5 / scaleFactor, 5 / scaleFactor]);
+        ctx.strokeRect(selectionBox.x, selectionBox.y, selectionBox.width, selectionBox.height);
+
+        const msizecheckbox = document.getElementById("toggle-m");
+        if (msizecheckbox.checked) {
+          const centerX = selectionBox.x + selectionBox.width ;
+          const centerY = selectionBox.y - (4/scaleFactor);
+          const sizeText = `${((selectionBox.width / 40)*0.3048).toFixed(1)}m × ${((selectionBox.height / 40)*0.3048).toFixed(1)}m`;
+
+          ctx.font = `${14 / scaleFactor}px Arial`;
+          ctx.fillStyle = 'black';
+          ctx.textAlign = 'right';
+          if (!(Math.abs(selectionBox.width / 40)=== 0 && Math.abs(selectionBox.height / 40) === 0)) {
+            ctx.fillText(sizeText, centerX, centerY);
+          }
+        }
+        const ftsizecheckbox = document.getElementById("toggle-ft");
+        if (ftsizecheckbox.checked) {
+          const fcenterX = selectionBox.x ;
+          const fcenterY = selectionBox.y + selectionBox.height + (14/scaleFactor);
+          const fsizeText = `${Math.abs(selectionBox.width / 40)}' × ${Math.abs(selectionBox.height / 40)}'`;
+
+          ctx.font = `${14 / scaleFactor}px Arial`;
+          ctx.fillStyle = 'black';
+          ctx.textAlign = 'left';
+          if (!(Math.abs(selectionBox.width / 40)=== 0 && Math.abs(selectionBox.height / 40) === 0)) {
+            ctx.fillText(fsizeText, fcenterX, fcenterY);
+          }
+        }
+
+        ctx.restore();
+      }
+    }
+
+    preloadImages().then(draw); 
+
+
+
+function applyInnerShadow(ctx, box) { Object.assign(ctx, { shadowColor: 'rgba(0,0,0,1)', shadowBlur: 50 * scaleFactor, globalCompositeOperation: 'source-atop', strokeStyle: 'rgba(0,0,0,1)', lineWidth: 1 }); for (let i = 0; i < 5; i++) ctx.strokeRect(box.x, box.y, box.width, box.height); Object.assign(ctx, { shadowColor: 'transparent', shadowBlur: 0, globalCompositeOperation: 'source-over' }); }
+
+
+
+function drawBox(ctx, box, imageSource) {
+  const imageUrl = typeof imageSource === 'string' ? imageSource : null;
+
+  if (imageUrl && (!box._image || box._image.src !== imageUrl)) {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      box._image = img;
+      drawBox(ctx, box, img);
+    };
+    img.src = imageUrl;
+    return;
+  }
+
+  const image = box._image || imageSource;
+  if (!(image instanceof HTMLImageElement)) return;
+
+  const aspectRatio = image.height / image.width;
+  const DEFAULT_TILE_W = 6; // grid units (6 x 40 = 240 px)
+  const tileGridW = (box.tileW != null && box.tileW > 0) ? box.tileW : DEFAULT_TILE_W;
+  const tileGridH = (box.tileH != null && box.tileH > 0) ? box.tileH : tileGridW * aspectRatio;
+  const TILE_WIDTH  = tileGridW * GRID_SIZE;
+  const TILE_HEIGHT = tileGridH * GRID_SIZE;
+
+  if (box.tileW == null) {
+    box.tileW = DEFAULT_TILE_W;
+    box.tileH = parseFloat((DEFAULT_TILE_W * aspectRatio).toFixed(2));
+    if (selectedBoxes.length === 1 && selectedBoxes[0] === box) {
+      const wEl = document.getElementById('imageScaleWidthInput');
+      const hEl = document.getElementById('imageScaleHeightInput');
+      if (wEl) wEl.value = box.tileW;
+      if (hEl) hEl.value = box.tileH;
+    }
+  }
+
+  const rotation = (box.imageRotation || 0) * Math.PI / 180;
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(box.x, box.y, box.width, box.height);
+  ctx.clip();
+
+  ctx.translate(cx, cy);
+  ctx.rotate(rotation);
+  ctx.translate(-cx, -cy);
+
+  const diagonal = Math.ceil(Math.sqrt(box.width * box.width + box.height * box.height));
+  const startX = cx - diagonal;
+  const startY = cy - diagonal;
+  const cols = Math.ceil(diagonal * 2 / TILE_WIDTH) + 2;
+  const rows = Math.ceil(diagonal * 2 / TILE_HEIGHT) + 2;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const dx = startX + (c * TILE_WIDTH);
+      const dy = startY + (r * TILE_HEIGHT);
+      ctx.drawImage(
+        image,
+        0, 0, image.width, image.height,
+        dx, dy, TILE_WIDTH, TILE_HEIGHT
+      );
+    }
+  }
+
+  ctx.restore();
+}
+
+
+
+function updateShadows() {
+  const opacityInput = document.getElementById('shadowOpacity');
+  const spreadInput = document.getElementById('shadowSpread');
+
+  if (opacityInput && spreadInput) {
+    SHADOW_SETTINGS.opacity = parseFloat(opacityInput.value);
+    SHADOW_SETTINGS.spread = parseFloat(spreadInput.value);
+    
+    draw(); 
+  }
+}
+
+
+
+function updateImageControlsVisibility(selectedBoxes) {
+  const btnDeleteContainer    = document.getElementById('btnDeleteContainer');
+  const btnCopyContainer      = document.getElementById('btnCopyContainer');
+  const roomSettingsContainer = document.getElementById('roomSettingsContainer');
+  const objectSettingsContainer = document.getElementById('objectSettingsContainer');
+
+  const hasRooms   = selectedBoxes.length > 0;
+  const hasObjects = selectedPlacedAssets.length > 0;
+  const anySelected = hasRooms || hasObjects;
+
+  btnDeleteContainer.style.display  = anySelected ? 'inline-block' : 'none';
+  btnCopyContainer.style.display    = anySelected ? 'inline-block' : 'none';
+
+  roomSettingsContainer.style.display   = (hasRooms && !hasObjects)   ? 'inline-block' : 'none';
+
+  objectSettingsContainer.style.display = (hasObjects && !hasRooms)   ? 'inline-block' : 'none';
+
+  if (hasObjects && !hasRooms && selectedPlacedAsset) {
+    renderObjectParamPanel(selectedPlacedAsset);
+  }
+
+  if (!hasRooms || hasObjects) {
+    document.getElementById('imageDropdownPanel').style.display = 'none';
+    document.getElementById('btnImage').classList.remove('clicked');
+  }
+  if (!hasObjects || hasRooms) {
+    document.getElementById('objectSettingsPanel').style.display = 'none';
+    document.getElementById('btnObjectSettings').classList.remove('clicked');
+  }
+
+  if (!hasRooms) return;
+
+  const urlInput   = document.getElementById('imageUrlInput');
+  const scaleWInput = document.getElementById('imageScaleWidthInput');
+  const scaleHInput = document.getElementById('imageScaleHeightInput');
+  const rotateBtn  = document.getElementById('rotateImageBtn');
+  const deleteBtn  = document.getElementById('deleteImageBtn');
+  const copyBtn    = document.getElementById('copyLinkBtn');
+  const roomNameInput = document.getElementById('roomNameInput');
+
+  urlInput.value = "";
+  scaleWInput.value = "";
+  scaleHInput.value = "";
+
+  if (roomNameInput) {
+    if (selectedBoxes.length === 1) {
+      roomNameInput.value = selectedBoxes[0].name || "";
+    } else {
+      const names = [...new Set(selectedBoxes.map(box => box.name).filter(Boolean))];
+      roomNameInput.value = names.length === 1 ? names[0] : "";
+    }
+
+    roomNameInput.oninput = () => {
+      const newName = roomNameInput.value;
+      selectedBoxes.forEach(box => { box.name = newName; });
+      draw();
+    };
+  }
+
+  if (selectedBoxes.length === 1) {
+    const box = selectedBoxes[0];
+    urlInput.value = box.imageName || "";
+    if (box.tileW != null) {
+      scaleWInput.value = box.tileW;
+      scaleHInput.value = box.tileH;
+    } else {
+      const img = box._image || imageCache[box.imageName];
+      const defaultW = 6;
+      scaleWInput.value = defaultW;
+      scaleHInput.value = img ? parseFloat((defaultW * img.height / img.width).toFixed(2)) : defaultW;
+    }
+  } else {
+    const imageNames = selectedBoxes.map(box => box.imageName).filter(Boolean);
+    const uniqueNames = [...new Set(imageNames)];
+
+    if (uniqueNames.length === 1) {
+      urlInput.value = uniqueNames[0];
+    } else if (uniqueNames.length > 1) {
+      urlInput.value = "Multiple..";
+    } else {
+      urlInput.value = "";
+    }
+
+    scaleWInput.value = "";
+    scaleHInput.value = "";
+  }
+
+  scaleWInput.oninput = () => {
+    const val = parseFloat(scaleWInput.value);
+    if (!isNaN(val) && val > 0) {
+      selectedBoxes.forEach(box => { box.tileW = val; });
+      draw();
+    }
+  };
+  scaleHInput.oninput = () => {
+    const val = parseFloat(scaleHInput.value);
+    if (!isNaN(val) && val > 0) {
+      selectedBoxes.forEach(box => { box.tileH = val; });
+      draw();
+    }
+  };
+
+  urlInput.onkeydown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const url = urlInput.value.trim();
+      if (!url) {
+        alert("Please enter an image URL.");
+        return;
+      }
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = function () {
+        selectedBoxes.forEach(box => {
+          box.image = img;
+          box.imageName = url;
+          delete box._image; // Force re-load in drawBox
+        });
+
+        if (selectedBoxes.length === 1) {
+          scaleWInput.value = Math.round(selectedBoxes[0].width / GRID_SIZE);
+          scaleHInput.value = Math.round(selectedBoxes[0].height / GRID_SIZE);
+        }
+
+        draw();
+      };
+
+      img.onerror = () => alert("Failed to load image from the URL.");
+      img.src = url;
+    }
+  };
+
+  rotateBtn.onclick = () => {
+    selectedBoxes.forEach(box => {
+      box.imageRotation = ((box.imageRotation || 0) + 90) % 360;
+    });
+    draw();
+  };
+
+  deleteBtn.onclick = () => {
+    selectedBoxes.forEach(box => {
+      box.image = null;
+      box.imageName = null;
+      delete box.imageWidth;
+      delete box.imageHeight;
+      delete box._image;
+      box.imageRotation = 0;
+    });
+
+    urlInput.value = "";
+    scaleWInput.value = selectedBoxes.length === 1 ? Math.round(selectedBoxes[0].width / GRID_SIZE) : "";
+    scaleHInput.value = selectedBoxes.length === 1 ? Math.round(selectedBoxes[0].height / GRID_SIZE) : "";
+    draw();
+  };
+
+  copyBtn.onclick = () => {
+    const url = urlInput.value.trim();
+    if (!url) {
+      alert("Nothing to copy.");
+      return;
+    }
+    navigator.clipboard.writeText(url).then(() => {
+      copyBtn.textContent = "⿻";
+      setTimeout(() => copyBtn.textContent = "⿻", 1500);
+    }).catch(() => {
+      alert("Failed to copy link.");
+    });
+  };
+}
+
+
+
+    function drawGrid() {
+      const gridToggle = document.getElementById("toggle-grid");
+      if (!gridToggle.checked) return;
+
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.lineWidth = 1;
+      const startX = Math.floor(-cameraOffset.x / scaleFactor / GRID_SIZE) * GRID_SIZE;
+      const endX = startX + canvas.width / scaleFactor + GRID_SIZE;
+      const startY = Math.floor(-cameraOffset.y / scaleFactor / GRID_SIZE) * GRID_SIZE;
+      const endY = startY + canvas.height / scaleFactor + GRID_SIZE;
+      for (let x = startX; x < endX; x += GRID_SIZE) {
+        ctx.beginPath();
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, endY);
+        ctx.stroke();
+      }
+      for (let y = startY; y < endY; y += GRID_SIZE) {
+        ctx.beginPath();
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
+        ctx.stroke();
+      }
+    }
+
+
+    function getMousePos(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (evt.clientX - rect.left - cameraOffset.x) / scaleFactor;
+      const y = (evt.clientY - rect.top - cameraOffset.y) / scaleFactor;
+      return { x, y };
+    }
+
+    function getTopmostBox(mx, my) {
+      for (let i = boxes.length - 1; i >= 0; i--) {
+        const box = boxes[i];
+        if (mx >= box.x - 10 && mx <= box.x + box.width + 10 && my >= box.y - 10 && my <= box.y + box.height + 10) {
+          return box;
+        }
+      }
+      return null;
+    }
+
+    function isIntersecting(selectionBox, box) {
+      return !(box.x + box.width < selectionBox.x || 
+        box.x > selectionBox.x + selectionBox.width || 
+        box.y + box.height < selectionBox.y || 
+        box.y > selectionBox.y + selectionBox.height);
+    }
+
+    function zoomToFit() {
+      if (boxes.length === 0) return;
+      let minX = Math.min(...boxes.map(b => b.x));
+      let minY = Math.min(...boxes.map(b => b.y));
+      let maxX = Math.max(...boxes.map(b => b.x + b.width));
+      let maxY = Math.max(...boxes.map(b => b.y + b.height));
+      let contentWidth = maxX - minX;
+      let contentHeight = maxY - minY;
+      let canvasWidth = canvas.width;
+      let canvasHeight = canvas.height;
+      let padding = 40;
+      let scaleX = (canvasWidth - padding * 2) / contentWidth;
+      let scaleY = (canvasHeight - padding * 2) / contentHeight;
+      scaleFactor = Math.min(scaleX, scaleY, 10);
+      cameraOffset.x = (canvasWidth - contentWidth * scaleFactor) / 2 - minX * scaleFactor;
+      cameraOffset.y = (canvasHeight - contentHeight * scaleFactor) / 2 - minY * scaleFactor;
+      draw();
+    }
+
+    function clearSelection() {
+      selectedBoxes = [];
+      selected = null;
+      selectedPlacedAsset = null;
+      selectedPlacedAssets = [];
+      updateImageControlsVisibility(selectedBoxes);
+    }
+
+    let selectedAsset = null;
+    let draggingAsset = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    let selectedPlacedAssets = [];
+    let placedAssetHandles = [];
+    let resizingPlacedAsset = false;
+    let activePlacedHandle = null;
+    let draggingPlacedGroup = false;
+    let placedGroupStartMouse = { x: 0, y: 0 };
+    let placedGroupOriginalPositions = [];
+    let assetClipboard = [];
+    let mixedGroupDrag = false;
+    let mixedGroupStartMouse = { x: 0, y: 0 };
+    let mixedGroupOrigBoxPositions = [];
+    let mixedGroupOrigAssetPositions = [];
+
+    function updatePlacedAssetHandles() {
+      if (!selectedPlacedAsset) return (placedAssetHandles = []);
+      const isDragging = draggingAsset && draggingAsset.asset === selectedPlacedAsset;
+      const posX = isDragging ? draggingAsset.x : selectedPlacedAsset.x;
+      const posY = isDragging ? draggingAsset.y : selectedPlacedAsset.y;
+      const w = selectedPlacedAsset.scale.cols * GRID_SIZE;
+      const h = selectedPlacedAsset.scale.rows * GRID_SIZE;
+      const cx = posX + w / 2;
+      const cy = posY + h / 2;
+      const rot = ((isDragging ? (draggingAsset.rotation || 0) : (selectedPlacedAsset.rotation || 0))) * Math.PI / 180;
+      const cos = Math.cos(rot), sin = Math.sin(rot);
+
+      function toWorld(lx, ly) {
+        return { x: cx + lx * cos - ly * sin, y: cy + lx * sin + ly * cos };
+      }
+
+      const inset = 7.5 / scaleFactor;
+      placedAssetHandles = [
+        { ...toWorld(0,          -h/2 + inset), cursor: "ns-resize", side: "top"    },
+        { ...toWorld(0,           h/2 - inset), cursor: "ns-resize", side: "bottom" },
+        { ...toWorld(-w/2 + inset, 0          ), cursor: "ew-resize", side: "left"   },
+        { ...toWorld( w/2 - inset, 0          ), cursor: "ew-resize", side: "right"  }
+      ];
+    }
+
+
+canvas.addEventListener("mousedown", (e) => {
+  if (e.button === 1) {
+    panning = true;
+    panStart.x = e.clientX - cameraOffset.x;
+    panStart.y = e.clientY - cameraOffset.y;
+    canvas.style.cursor = "grab";
+    return;
+  }
+
+  const { x: mx, y: my } = getMousePos(e);
+
+  if (selectedBoxes.length === 1) {
+    updateHandles();
+    const hitHandle = handles.find(h => Math.hypot(h.x - mx, h.y - my) < 15 / scaleFactor);
+    if (hitHandle) {
+      activeHandle = hitHandle;
+      resizing = true;
+      canvas.style.cursor = hitHandle.cursor;
+      return;
+    }
+  }
+
+  if (selectedPlacedAssets.length === 1 && selectedPlacedAsset) {
+    updatePlacedAssetHandles();
+    const hitHandle = placedAssetHandles.find(h => Math.hypot(h.x - mx, h.y - my) < 15 / scaleFactor);
+    if (hitHandle) {
+      activePlacedHandle = hitHandle;
+      resizingPlacedAsset = true;
+      canvas.style.cursor = hitHandle.cursor;
+      return;
+    }
+  }
+
+  for (let i = placedAssets.length - 1; i >= 0; i--) {
+      const asset = placedAssets[i];
+      const width = asset.scale.cols * GRID_SIZE;
+      const height = asset.scale.rows * GRID_SIZE;
+      if (mx >= asset.x && mx <= asset.x + width && my >= asset.y && my <= asset.y + height) {
+
+          if (selectedPlacedAssets.includes(asset) && selectedBoxes.length > 0) {
+              mixedGroupDrag = true;
+              mixedGroupStartMouse = { x: mx, y: my };
+              mixedGroupOrigBoxPositions = selectedBoxes.map(b => ({ box: b, x: b.x, y: b.y }));
+              mixedGroupOrigAssetPositions = selectedPlacedAssets.map(a => ({ asset: a, x: a.x, y: a.y }));
+              canvas.style.cursor = "move";
+              return;
+          }
+
+          if (selectedPlacedAssets.length > 1 && selectedPlacedAssets.includes(asset)) {
+              draggingPlacedGroup = true;
+              placedGroupStartMouse = { x: mx, y: my };
+              placedGroupOriginalPositions = selectedPlacedAssets.map(a => ({ asset: a, x: a.x, y: a.y }));
+              canvas.style.cursor = "move";
+              return;
+          }
+
+          selectedPlacedAsset = asset;
+          selectedPlacedAssets = [asset];
+          selectedBoxes = [];
+          selected = null;
+          dragPlacedOffsetX = mx - asset.x;
+          dragPlacedOffsetY = my - asset.y;
+
+          draggingAsset = {
+              asset: asset,
+              x: asset.x,
+              y: asset.y,
+              width: width,
+              height: height,
+              rotation: asset.rotation || 0
+          };
+
+          asset._hidden = true;
+          updateImageControlsVisibility(selectedBoxes);
+          draw();
+          return;
+      }
+  }
+
+  const hitBox = getTopmostBox(mx, my);
+  if (hitBox) {
+    if (selectedBoxes.includes(hitBox) && selectedPlacedAssets.length > 0 && !(e.ctrlKey || e.metaKey)) {
+      mixedGroupDrag = true;
+      mixedGroupStartMouse = { x: mx, y: my };
+      mixedGroupOrigBoxPositions = selectedBoxes.map(b => ({ box: b, x: b.x, y: b.y }));
+      mixedGroupOrigAssetPositions = selectedPlacedAssets.map(a => ({ asset: a, x: a.x, y: a.y }));
+      canvas.style.cursor = "move";
+      return;
+    }
+
+    selectedPlacedAsset = null;
+    selectedPlacedAssets = [];    if (e.ctrlKey || e.metaKey) {
+      if (selectedBoxes.includes(hitBox)) {
+        selectedBoxes = selectedBoxes.filter(b => b !== hitBox);
+      } else {
+        selectedBoxes.push(hitBox);
+      }
+      selected = selectedBoxes.length === 1 ? selectedBoxes[0] : null;
+      draw();
+      updateImageControlsVisibility(selectedBoxes);
+      return;
+    }
+
+    if (selectedBoxes.length > 1 && selectedBoxes.includes(hitBox)) {
+      draggingGroup = true;
+      groupStartMouse = { x: mx, y: my };
+      groupOriginalPositions = selectedBoxes.map(b => ({ box: b, x: b.x, y: b.y }));
+      canvas.style.cursor = "move";
+      return;
+    }
+
+    selectedBoxes = [hitBox];
+    selected = hitBox;
+    draggingSingle = true;
+    dragOffset.x = mx - selected.x;
+    dragOffset.y = my - selected.y;
+    canvas.style.cursor = "move";
+    draw();
+    updateImageControlsVisibility(selectedBoxes);
+    return;
+  }
+
+
+  if (showAssets) {
+    const gridOffset = 10 * GRID_SIZE;
+    let maxBoxRight = 0;
+    boxes.forEach(box => {
+      const right = box.x + box.width;
+      if (right > maxBoxRight) maxBoxRight = right;
+    });
+    const startX = maxBoxRight + gridOffset;
+
+    let currentY = 0;
+    selectedAsset = null;
+
+    for (const asset of imageLibrary) {
+      const img = imageCache[asset.url];
+      if (!img) continue;
+
+      const width = asset.scale.cols * GRID_SIZE;
+      const height = asset.scale.rows * GRID_SIZE;
+      const x = startX + asset.location.x * GRID_SIZE;
+      const y = asset.location.y * GRID_SIZE;
+
+      if (mx >= x && mx <= x + width && my >= y && my <= y + height) {
+        selectedAsset = asset;
+        dragOffsetX = mx - x;
+        dragOffsetY = my - y;
+        draggingAsset = {
+          asset,
+          x: mx - dragOffsetX,
+          y: my - dragOffsetY,
+          width,
+          height
+        };
+        return;
+      }
+
+      currentY += height + GRID_SIZE;
+    }
+  }
+
+  clearSelection();
+
+  selectionBox = { startX: mx, startY: my, x: mx, y: my, width: 0, height: 0 };
+  canvas.style.cursor = "crosshair";
+  draw();
+});
+
+
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (panning) {
+        cameraOffset.x = e.clientX - panStart.x;
+        cameraOffset.y = e.clientY - panStart.y;
+        draw();
+        return;
+      }
+      const { x: mx, y: my } = getMousePos(e);
+      if (mixedGroupDrag) {
+        const dx = snapDeltaToGrid(mx - mixedGroupStartMouse.x);
+        const dy = snapDeltaToGrid(my - mixedGroupStartMouse.y);
+        mixedGroupOrigBoxPositions.forEach(({ box, x, y }) => {
+          box.x = x + dx;
+          box.y = y + dy;
+        });
+        const adx = snapAssetDeltaToGrid(mx - mixedGroupStartMouse.x);
+        const ady = snapAssetDeltaToGrid(my - mixedGroupStartMouse.y);
+        mixedGroupOrigAssetPositions.forEach(({ asset, x, y }) => {
+          asset.x = x + adx;
+          asset.y = y + ady;
+        });
+        draw();
+        return;
+      }
+      if (draggingPlacedGroup) {
+        const dx = snapAssetDeltaToGrid(mx - placedGroupStartMouse.x);
+        const dy = snapAssetDeltaToGrid(my - placedGroupStartMouse.y);
+        placedGroupOriginalPositions.forEach(({ asset, x, y }) => {
+          asset.x = x + dx;
+          asset.y = y + dy;
+        });
+        draw();
+        return;
+      }
+      if (draggingAsset) {
+          let offsetX = selectedPlacedAsset ? dragPlacedOffsetX : dragOffsetX;
+          let offsetY = selectedPlacedAsset ? dragPlacedOffsetY : dragOffsetY;
+
+          let newX = mx - offsetX;
+          let newY = my - offsetY;
+
+          draggingAsset.x = snapAssetToGrid(newX);
+          draggingAsset.y = snapAssetToGrid(newY);
+          draw();
+          return;
+      }
+
+      if (resizingPlacedAsset && activePlacedHandle && selectedPlacedAsset) {
+        const asset = selectedPlacedAsset;
+        const w = asset.scale.cols * GRID_SIZE;
+        const h = asset.scale.rows * GRID_SIZE;
+        const cx = asset.x + w / 2;
+        const cy = asset.y + h / 2;
+        const rot = ((asset.rotation || 0) % 360 + 360) % 360;
+        const side = activePlacedHandle.side;
+
+        if (rot === 0) {
+          if (side === "top") {
+            const newY = snapAssetToGrid(my), newH = asset.y + h - newY;
+            if (newH >= ASSET_SNAP_SIZE) { asset.y = newY; asset.scale.rows = newH / GRID_SIZE; }
+          } else if (side === "bottom") {
+            const newH = snapAssetToGrid(my - asset.y);
+            if (newH >= ASSET_SNAP_SIZE) asset.scale.rows = newH / GRID_SIZE;
+          } else if (side === "left") {
+            const newX = snapAssetToGrid(mx), newW = asset.x + w - newX;
+            if (newW >= ASSET_SNAP_SIZE) { asset.x = newX; asset.scale.cols = newW / GRID_SIZE; }
+          } else if (side === "right") {
+            const newW = snapAssetToGrid(mx - asset.x);
+            if (newW >= ASSET_SNAP_SIZE) asset.scale.cols = newW / GRID_SIZE;
+          }
+
+        } else if (rot === 90) {
+          if (side === "top") {                
+            const fixedL = cx - h / 2;
+            const newH = snapAssetToGrid(mx - fixedL);
+            if (newH >= ASSET_SNAP_SIZE) {
+              asset.scale.rows = newH / GRID_SIZE;
+              asset.x = fixedL + newH / 2 - w / 2;
+              asset.y = cy - newH / 2;
+            }
+          } else if (side === "bottom") {       
+            const fixedR = cx + h / 2;
+            const newH = snapAssetToGrid(fixedR - mx);
+            if (newH >= ASSET_SNAP_SIZE) {
+              asset.scale.rows = newH / GRID_SIZE;
+              asset.x = fixedR - newH / 2 - w / 2;
+              asset.y = cy - newH / 2;
+            }
+          } else if (side === "left") {         
+            const fixedB = cy + w / 2;
+            const newW = snapAssetToGrid(fixedB - my);
+            if (newW >= ASSET_SNAP_SIZE) {
+              asset.scale.cols = newW / GRID_SIZE;
+              asset.y = fixedB - newW / 2 - h / 2;
+              asset.x = cx - newW / 2;
+            }
+          } else if (side === "right") {        
+            const fixedT = cy - w / 2;
+            const newW = snapAssetToGrid(my - fixedT);
+            if (newW >= ASSET_SNAP_SIZE) {
+              asset.scale.cols = newW / GRID_SIZE;
+              asset.y = fixedT + newW / 2 - h / 2;
+              asset.x = cx - newW / 2;
+            }
+          }
+
+        } else if (rot === 180) {
+          if (side === "top") {                 
+            const newH = snapAssetToGrid(my - asset.y);
+            if (newH >= ASSET_SNAP_SIZE) asset.scale.rows = newH / GRID_SIZE;
+          } else if (side === "bottom") {       
+            const fixedB = asset.y + h, newY = snapAssetToGrid(my), newH = fixedB - newY;
+            if (newH >= ASSET_SNAP_SIZE) { asset.y = newY; asset.scale.rows = newH / GRID_SIZE; }
+          } else if (side === "left") {         
+            const newW = snapAssetToGrid(mx - asset.x);
+            if (newW >= ASSET_SNAP_SIZE) asset.scale.cols = newW / GRID_SIZE;
+          } else if (side === "right") {        
+            const fixedR = asset.x + w, newX = snapAssetToGrid(mx), newW = fixedR - newX;
+            if (newW >= ASSET_SNAP_SIZE) { asset.x = newX; asset.scale.cols = newW / GRID_SIZE; }
+          }
+
+        } else if (rot === 270) {
+          if (side === "top") {                 
+            const fixedR = cx + h / 2;
+            const newH = snapAssetToGrid(fixedR - mx);
+            if (newH >= ASSET_SNAP_SIZE) {
+              asset.scale.rows = newH / GRID_SIZE;
+              asset.x = fixedR - newH / 2 - w / 2;
+              asset.y = cy - newH / 2;
+            }
+          } else if (side === "bottom") {       
+            const fixedL = cx - h / 2;
+            const newH = snapAssetToGrid(mx - fixedL);
+            if (newH >= ASSET_SNAP_SIZE) {
+              asset.scale.rows = newH / GRID_SIZE;
+              asset.x = fixedL + newH / 2 - w / 2;
+              asset.y = cy - newH / 2;
+            }
+          } else if (side === "left") {         
+            const fixedT = cy - w / 2;
+            const newW = snapAssetToGrid(my - fixedT);
+            if (newW >= ASSET_SNAP_SIZE) {
+              asset.scale.cols = newW / GRID_SIZE;
+              asset.y = fixedT + newW / 2 - h / 2;
+              asset.x = cx - newW / 2;
+            }
+          } else if (side === "right") {        
+            const fixedB = cy + w / 2;
+            const newW = snapAssetToGrid(fixedB - my);
+            if (newW >= ASSET_SNAP_SIZE) {
+              asset.scale.cols = newW / GRID_SIZE;
+              asset.y = fixedB - newW / 2 - h / 2;
+              asset.x = cx - newW / 2;
+            }
+          }
+        }
+
+        draw();
+        return;
+      }
+
+      if (resizing && activeHandle && selected) {
+        if (activeHandle.side === "top") {
+          let newY = snapToGrid(my);
+          let newHeight = selected.y + selected.height - newY;
+          if (newHeight >= GRID_SIZE) {
+            selected.y = newY;
+            selected.height = newHeight;
+          }
+        } else if (activeHandle.side === "bottom") {
+          let newHeight = snapToGrid(my - selected.y);
+          if (newHeight >= GRID_SIZE) selected.height = newHeight;
+        } else if (activeHandle.side === "left") {
+          let newX = snapToGrid(mx);
+          let newWidth = selected.x + selected.width - newX;
+          if (newWidth >= GRID_SIZE) {
+            selected.x = newX;
+            selected.width = newWidth;
+          }
+        } else if (activeHandle.side === "right") {
+          let newWidth = snapToGrid(mx - selected.x);
+          if (newWidth >= GRID_SIZE) selected.width = newWidth;
+        }
+        draw();
+        return;
+      }
+
+      if (draggingSingle && selected) {
+        selected.x = snapToGrid(mx - dragOffset.x);
+        selected.y = snapToGrid(my - dragOffset.y);
+        draw();
+        return;
+      }
+
+      if (draggingGroup && selectedBoxes.length > 1) {
+        const dx = snapDeltaToGrid(mx - groupStartMouse.x);
+        const dy = snapDeltaToGrid(my - groupStartMouse.y);
+        groupOriginalPositions.forEach(({ box, x, y }) => {
+          box.x = x + dx;
+          box.y = y + dy;
+        });
+        draw();
+        return;
+      }
+
+      if (selectionBox) {
+        const startX = selectionBox.startX;
+        const startY = selectionBox.startY;
+        let x = Math.min(startX, mx);
+        let y = Math.min(startY, my);
+        let width = Math.abs(mx - startX);
+        let height = Math.abs(my - startY);
+
+        x = Math.floor(x / GRID_SIZE) * GRID_SIZE;
+        y = Math.floor(y / GRID_SIZE) * GRID_SIZE;
+        width = Math.ceil((width + (Math.min(startX, mx) - x)) / GRID_SIZE) * GRID_SIZE;
+        height = Math.ceil((height + (Math.min(startY, my) - y)) / GRID_SIZE) * GRID_SIZE;
+
+        selectionBox.x = x;
+        selectionBox.y = y;
+        selectionBox.width = width;
+        selectionBox.height = height;
+
+        selectedBoxes = boxes.filter(box => isIntersecting(selectionBox, box));
+        selectedPlacedAssets = placedAssets.filter(a => isIntersecting(selectionBox,
+          { x: a.x, y: a.y, width: a.scale.cols * GRID_SIZE, height: a.scale.rows * GRID_SIZE }));
+        selectedPlacedAsset = selectedPlacedAssets.length === 1 ? selectedPlacedAssets[0] : null;
+        updateImageControlsVisibility(selectedBoxes);
+        draw();
+        return;
+      }
+    });
+
+
+
+
+    canvas.addEventListener("mouseup", (e) => {
+      if (e.button === 1) {
+        panning = false;
+        canvas.style.cursor = "default";
+        return;
+      }
+
+      draggingSingle = false;
+      draggingGroup = false;
+      draggingPlacedGroup = false;
+      mixedGroupDrag = false;
+      resizing = false;
+      activeHandle = null;
+      resizingPlacedAsset = false;
+      activePlacedHandle = null;
+
+      if (selectionBox) {
+        selectedBoxes = boxes.filter(box => isIntersecting(selectionBox, box));
+        selected = selectedBoxes.length === 1 ? selectedBoxes[0] : null;
+        selectedPlacedAssets = placedAssets.filter(a => isIntersecting(selectionBox,
+          { x: a.x, y: a.y, width: a.scale.cols * GRID_SIZE, height: a.scale.rows * GRID_SIZE }));
+        selectedPlacedAsset = selectedPlacedAssets.length === 1 ? selectedPlacedAssets[0] : null;
+        selectionBox = null;
+        updateImageControlsVisibility(selectedBoxes);
+      }
+
+      canvas.style.cursor = "default";
+
+      if (draggingAsset) {
+          if (selectedPlacedAsset) {
+              selectedPlacedAsset.x = draggingAsset.x;
+              selectedPlacedAsset.y = draggingAsset.y;
+              delete selectedPlacedAsset._hidden;
+          } else if (showAssets) {
+              const newAsset = {
+                  ...draggingAsset.asset,
+                  scale: { ...draggingAsset.asset.scale },
+                  x: snapToGrid(draggingAsset.x),
+                  y: snapToGrid(draggingAsset.y),
+                  params: {}
+              };
+              placedAssets.push(newAsset);
+              selectedPlacedAsset = newAsset;
+              selectedPlacedAssets = [newAsset];
+          }
+          selectedAsset = null;
+          draggingAsset = null;
+          updateImageControlsVisibility(selectedBoxes);
+      }
+
+      draw();
+    });
+
+
+
+    // ── Touch support ────────────────────────────────────────
+    // Helpers to convert a Touch into a synthetic mouse-like event object
+    function touchToMouse(touch) {
+      return { clientX: touch.clientX, clientY: touch.clientY, button: 0 };
+    }
+    function getTouchPos(touch) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (touch.clientX - rect.left - cameraOffset.x) / scaleFactor,
+        y: (touch.clientY - rect.top  - cameraOffset.y) / scaleFactor
+      };
+    }
+
+    let lastTouchDist = null;   // for pinch-zoom
+    let lastTouchMid  = null;   // midpoint of two-finger touch (screen coords)
+    let touchPanning  = false;
+    let touchPanStart = { x: 0, y: 0 };
+
+    canvas.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      if (e.touches.length === 1) {
+        lastTouchDist = null;
+        lastTouchMid  = null;
+        // Fire mousedown logic via synthetic event
+        const t = e.touches[0];
+        const synth = { ...touchToMouse(t), button: 0,
+          ctrlKey: false, metaKey: false,
+          target: canvas };
+        // Dispatch a real MouseEvent so the existing handler fires
+        canvas.dispatchEvent(new MouseEvent("mousedown", {
+          bubbles: true, cancelable: true,
+          clientX: t.clientX, clientY: t.clientY, button: 0
+        }));
+      } else if (e.touches.length === 2) {
+        // Cancel any single-touch drag
+        canvas.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, button: 0 }));
+        const t0 = e.touches[0], t1 = e.touches[1];
+        lastTouchDist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+        lastTouchMid  = {
+          x: (t0.clientX + t1.clientX) / 2,
+          y: (t0.clientY + t1.clientY) / 2
+        };
+      }
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      if (e.touches.length === 1 && lastTouchDist === null) {
+        const t = e.touches[0];
+        canvas.dispatchEvent(new MouseEvent("mousemove", {
+          bubbles: true, cancelable: true,
+          clientX: t.clientX, clientY: t.clientY
+        }));
+      } else if (e.touches.length === 2) {
+        const t0 = e.touches[0], t1 = e.touches[1];
+        const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+        const mid  = {
+          x: (t0.clientX + t1.clientX) / 2,
+          y: (t0.clientY + t1.clientY) / 2
+        };
+
+        if (lastTouchDist !== null) {
+          const rect  = canvas.getBoundingClientRect();
+          const screenX = mid.x - rect.left;
+          const screenY = mid.y - rect.top;
+          const worldX = (screenX - cameraOffset.x) / scaleFactor;
+          const worldY = (screenY - cameraOffset.y) / scaleFactor;
+
+          // Pinch zoom
+          const zoomFactor = dist / lastTouchDist;
+          const newScale   = Math.max(0.1, Math.min(10, scaleFactor * zoomFactor));
+          cameraOffset.x   = screenX - worldX * newScale;
+          cameraOffset.y   = screenY - worldY * newScale;
+          scaleFactor      = newScale;
+
+          // Two-finger pan (translate by midpoint delta)
+          if (lastTouchMid) {
+            cameraOffset.x += (mid.x - lastTouchMid.x);
+            cameraOffset.y += (mid.y - lastTouchMid.y);
+          }
+
+          draw();
+        }
+        lastTouchDist = dist;
+        lastTouchMid  = mid;
+      }
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      if (e.touches.length === 0) {
+        lastTouchDist = null;
+        lastTouchMid  = null;
+        canvas.dispatchEvent(new MouseEvent("mouseup", {
+          bubbles: true, cancelable: true, button: 0
+        }));
+      } else if (e.touches.length === 1) {
+        // Went from 2 fingers → 1; reset pinch state
+        lastTouchDist = null;
+        lastTouchMid  = null;
+      }
+    }, { passive: false });
+    // ── End touch support ────────────────────────────────────
+
+    canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+      const { x: worldX, y: worldY } = getMousePos(e);
+      const newScale = Math.max(0.1, Math.min(10, scaleFactor * zoom));
+
+      const rect = canvas.getBoundingClientRect();
+      const screenX = e.clientX - rect.left;
+      const screenY = e.clientY - rect.top;
+
+      cameraOffset.x = screenX - worldX * newScale;
+      cameraOffset.y = screenY - worldY * newScale;
+      scaleFactor = newScale;
+      draw();
+    }, { passive: false });
+
+    function resizeCanvas() {
+      const adSpace = document.getElementById('adSpace');
+      const adWidth = window.innerWidth <= 700 ? 0 : 300;
+      canvas.width = window.innerWidth - adWidth;
+      canvas.height = window.innerHeight - (document.querySelector('.header').offsetHeight || 50);
+      draw();
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+
+    let clipboard = [];
+
+    document.getElementById("btn4").addEventListener("click", () => {
+      if (selectedBoxes.length > 0 || selectedPlacedAssets.length > 0) {
+        boxes = boxes.filter(b => !selectedBoxes.includes(b));
+        placedAssets = placedAssets.filter(a => !selectedPlacedAssets.includes(a));
+        selectedBoxes = [];
+        selected = null;
+        selectedPlacedAssets = [];
+        selectedPlacedAsset = null;
+        updateImageControlsVisibility(selectedBoxes);
+        draw();
+      }
+    });
+
+    document.getElementById("btn8").addEventListener("click", function() {
+      location.reload();
+    });
+    document.addEventListener("keydown", (e) => {
+
+      if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+
+      if (e.key === "Escape") {
+        clearSelection();
+        draw();
+        return;
+      }
+
+      if (e.key === "Delete") {
+        if (selectedBoxes.length > 0 || selectedPlacedAssets.length > 0) {
+          boxes = boxes.filter(b => !selectedBoxes.includes(b));
+          placedAssets = placedAssets.filter(a => !selectedPlacedAssets.includes(a));
+          selectedBoxes = [];
+          selected = null;
+          selectedPlacedAssets = [];
+          selectedPlacedAsset = null;
+          updateImageControlsVisibility(selectedBoxes);
+          draw();
+        }
+        return;
+      }
+
+      if (e.code === "Space" && (selectedPlacedAsset || draggingAsset)) {
+        e.preventDefault();
+        if (selectedPlacedAsset) selectedPlacedAsset.rotation = (selectedPlacedAsset.rotation || 0) + 90;
+        if (draggingAsset)       draggingAsset.rotation       = (draggingAsset.rotation       || 0) + 90;
+        draw();
+        return;
+      }
+
+      if (e.ctrlKey && e.key.toLowerCase() === "c") {
+        if (selectedBoxes.length > 0)
+          clipboard = selectedBoxes.map(b => ({ ...b }));
+        if (selectedPlacedAssets.length > 0)
+          assetClipboard = selectedPlacedAssets.map(a => ({ ...a, scale: { ...a.scale } }));
+        return;
+      }
+
+      if (e.ctrlKey && e.key.toLowerCase() === "v") {
+        const newBoxes  = clipboard.map(b => ({ ...b, x: b.x + GRID_SIZE, y: b.y + GRID_SIZE }));
+        const newAssets = assetClipboard.map(a => ({
+          ...a, scale: { ...a.scale },
+          x: a.x + GRID_SIZE, y: a.y + GRID_SIZE
+        }));
+        if (newBoxes.length  > 0) boxes.push(...newBoxes);
+        if (newAssets.length > 0) placedAssets.push(...newAssets);
+        selectedBoxes        = newBoxes;
+        selected             = newBoxes.length === 1 ? newBoxes[0] : null;
+        selectedPlacedAssets = newAssets;
+        selectedPlacedAsset  = newAssets.length === 1 ? newAssets[0] : null;
+        updateImageControlsVisibility(selectedBoxes);
+        draw();
+        return;
+      }
+    });
+
+
+
+
+    document.getElementById("btn10").addEventListener("click", () => {
+      if (selectedBoxes.length === 0 && selectedPlacedAssets.length === 0) return;
+
+      clipboard      = selectedBoxes.map(b => ({ ...b }));
+      assetClipboard = selectedPlacedAssets.map(a => ({ ...a, scale: { ...a.scale } }));
+
+      const newBoxes  = clipboard.map(b => ({ ...b, x: b.x + GRID_SIZE, y: b.y + GRID_SIZE }));
+      const newAssets = assetClipboard.map(a => ({
+        ...a, scale: { ...a.scale },
+        x: a.x + GRID_SIZE, y: a.y + GRID_SIZE
+      }));
+
+      if (newBoxes.length  > 0) boxes.push(...newBoxes);
+      if (newAssets.length > 0) placedAssets.push(...newAssets);
+
+      selectedBoxes        = newBoxes;
+      selected             = newBoxes.length === 1 ? newBoxes[0] : null;
+      selectedPlacedAssets = newAssets;
+      selectedPlacedAsset  = newAssets.length === 1 ? newAssets[0] : null;
+
+      updateImageControlsVisibility(selectedBoxes);
+      draw();
+    });
+
+    function getCanvasData(){return{
+    iwall: document.getElementById('iwallData').value,
+    ewall: document.getElementById('ewallData').value,
+    settings: {
+      metric:       document.getElementById('toggle-m').checked,
+      imperial:     document.getElementById('toggle-ft').checked,
+      roomname:     document.getElementById('toggle-roomname').checked,
+      roomsize:     document.getElementById('toggle-roomsize').checked,
+      grid:         document.getElementById('toggle-grid').checked,
+      roomFontSize: document.getElementById('roomFontSize').value,
+      shadowOpacity: document.getElementById('shadowOpacity').value,
+      shadowSpread:  document.getElementById('shadowSpread').value,
+      libraryUrl:    document.getElementById('libraryInput').value,
+    },
+    objectParamDefs: objectParamDefs,
+    boxes:boxes.map(b=>({name:b.name,x:b.x,y:b.y,width:b.width,height:b.height,imageName:b.imageName||null,imageRotation:b.imageRotation||0,tileW:b.tileW||null,tileH:b.tileH||null})),
+    placedAssets:placedAssets.map(a=>({name:a.name,category:a.category,x:a.x,y:a.y,scale:a.scale,rotation: a.rotation || 0,url: a.url || a.imageName, params: a.params || {}}))
+    };}
+
+    document.getElementById('btnsave').addEventListener('click', () => {
+        const data = getCanvasData();
+        console.log(data);
+
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const now = new Date();
+        const date = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        const time = String(now.getHours()).padStart(2, '0') + '-' + String(now.getMinutes()).padStart(2, '0') + '-' + String(now.getSeconds()).padStart(2, '0');
+        const timestamp = `${date}_${time}`;
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `layout_${timestamp}.plantora`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    });
+
+    document.getElementById("zoomtofitbutton").addEventListener("click", zoomToFit);
+
+
+    document.getElementById("btnim").addEventListener("click", function () {
+        const canvas = document.getElementById("canvas");
+        const image = canvas.toDataURL("image/png");
+        const now = new Date();
+        const date = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+        const time = String(now.getHours()).padStart(2, '0') + '-' + String(now.getMinutes()).padStart(2, '0') + '-' + String(now.getSeconds()).padStart(2, '0');
+        const timestamp = `${date}_${time}`;
+        const link = document.createElement("a");
+        link.href = image;
+        link.download = `layout_${timestamp}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+
+    document.getElementById('btnImage').addEventListener('click', function () {
+      const panel = document.getElementById('imageDropdownPanel');
+      const isOpening = panel.style.display !== 'block';
+      panel.style.display = isOpening ? 'block' : 'none';
+      this.classList.toggle('clicked', isOpening);
+    });
+
+    document.getElementById('btnObjectSettings').addEventListener('click', function () {
+      const panel = document.getElementById('objectSettingsPanel');
+      const isOpening = panel.style.display !== 'block';
+      panel.style.display = isOpening ? 'block' : 'none';
+      this.classList.toggle('clicked', isOpening);
+    });
+
+    window.addEventListener('click', function (e) {
+      const roomContainer = document.getElementById('roomSettingsContainer');
+      if (roomContainer && !roomContainer.contains(e.target)) {
+        document.getElementById('imageDropdownPanel').style.display = 'none';
+        document.getElementById('btnImage').classList.remove('clicked');
+      }
+      const objContainer = document.getElementById('objectSettingsContainer');
+      if (objContainer && !objContainer.contains(e.target)) {
+        document.getElementById('objectSettingsPanel').style.display = 'none';
+        document.getElementById('btnObjectSettings').classList.remove('clicked');
+      }
+      const libContainer = document.getElementById('librarySettingsContainer');
+      if (libContainer && !libContainer.contains(e.target)) {
+        libContainer.classList.remove('open');
+        document.getElementById('btnobjectsettings').classList.remove('clicked');
+      }
+    });
+
+
+document.getElementById('btnopenfile').addEventListener('click', () => {
+    document.getElementById('fileLoader').click();
+});
+
+document.getElementById('fileLoader').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    let fileName = file.name.replace(/\.plantora$/i, '');
+    document.getElementById('fileNameDisplay').innerHTML = `<i class="fa-regular fa-folder-open"></i> ${fileName}`;
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        try {
+            const json = JSON.parse(e.target.result);
+
+            if (json.iwall !== undefined) {document.getElementById('iwallData').value = json.iwall; localStorage.setItem('iwallData', json.iwall); }
+            if (json.ewall !== undefined) {document.getElementById('ewallData').value = json.ewall; localStorage.setItem('ewallData', json.ewall); }
+
+            if (json.settings) {
+              const s = json.settings;
+              if (s.metric      !== undefined) document.getElementById('toggle-m').checked        = s.metric;
+              if (s.imperial    !== undefined) document.getElementById('toggle-ft').checked       = s.imperial;
+              if (s.roomname    !== undefined) document.getElementById('toggle-roomname').checked = s.roomname;
+              if (s.roomsize    !== undefined) document.getElementById('toggle-roomsize').checked = s.roomsize;
+              if (s.grid        !== undefined) document.getElementById('toggle-grid').checked     = s.grid;
+              if (s.roomFontSize  !== undefined) document.getElementById('roomFontSize').value    = s.roomFontSize;
+              if (s.shadowOpacity !== undefined) document.getElementById('shadowOpacity').value   = s.shadowOpacity;
+              if (s.shadowSpread  !== undefined) document.getElementById('shadowSpread').value    = s.shadowSpread;
+              if (s.shadowOpacity !== undefined || s.shadowSpread !== undefined) updateShadows();
+              if (s.libraryUrl    !== undefined) document.getElementById('libraryInput').value    = s.libraryUrl;
+            }
+
+            if (json.boxes && Array.isArray(json.boxes)) {
+                boxes = json.boxes.map(item => ({
+                    name: item.name || "Unnamed",
+                    x: item.x ?? 0,
+                    y: item.y ?? 0,
+                    width: item.width ?? 100,
+                    height: item.height ?? 100,
+                    color: item.color || "gray",
+                    imageName: item.imageName || "",
+                    imageRotation: item.imageRotation || 0,
+                    tileW: item.tileW || null,
+                    tileH: item.tileH || null,
+                    _image: null
+                }));
+
+                placedAssets = Array.isArray(json.placedAssets)
+                    ? json.placedAssets.map(asset => ({
+                        x: asset.x ?? 0,
+                        y: asset.y ?? 0,
+                        name: asset.name,
+                        category:  asset.category,
+                        scale: asset.scale || { rows: 1, cols: 1 },
+                        rotation: asset.rotation || 0,
+                        url: asset.imageName || asset.url || "",
+                        params: asset.params || {}
+                    }))
+                    : [];
+
+            if (Array.isArray(json.objectParamDefs)) {
+              objectParamDefs = json.objectParamDefs;
+              renderParamManager();
+            }
+
+            } else {
+                alert("Invalid file format.");
+                return;
+            }
+
+            const roomMap = new Map();
+            boxes.forEach(box => {
+                const count = roomMap.get(box.name) || 0;
+                roomMap.set(box.name, count + 1);
+            });
+            const selectedRooms = Array.from(roomMap.entries()).map(([room, count]) => ({ room, count }));
+            localStorage.setItem('selectedRooms', JSON.stringify(selectedRooms));
+
+            const missingUrls = placedAssets
+                .map(a => a.url)
+                .filter(url => url && !imageCache[url]);
+
+            const preloadMissing = missingUrls.map(url => new Promise(resolve => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => { imageCache[url] = img; resolve(); };
+                img.onerror = () => resolve(); // skip broken URLs silently
+                img.src = url;
+            }));
+
+            Promise.all(preloadMissing).then(() => {
+                if (typeof zoomToFit === 'function') zoomToFit();
+                else if (typeof draw === 'function') draw();
+            });
+
+        } catch (error) {
+            alert("Error reading file: " + error.message);
+        }
+    };
+
+    reader.readAsText(file);
+});
+
+
+
+
+document.getElementById('insertbutton').addEventListener('click', function () {
+    document.getElementById('insertFileLoader').click();
+});
+
+document.getElementById('insertFileLoader').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        try {
+            const json = JSON.parse(e.target.result);
+
+            const newBoxes = Array.isArray(json.boxes) ? json.boxes.map(item => ({
+                name: item.name || "Unnamed",
+                x: item.x ?? 0,
+                y: item.y ?? 0,
+                width: item.width ?? 100,
+                height: item.height ?? 100,
+                color: item.color || "gray",
+                imageName: item.imageName || "",
+                imageRotation: item.imageRotation || 0,
+                tileW: item.tileW || null,
+                tileH: item.tileH || null,
+                _image: null
+            })) : [];
+
+            const newPlacedAssets = Array.isArray(json.placedAssets) ? json.placedAssets.map(asset => ({
+                x: asset.x ?? 0,
+                y: asset.y ?? 0,
+                name: asset.name,
+                category: asset.category,
+                scale: asset.scale || { rows: 1, cols: 1 },
+                rotation: asset.rotation || 0,
+                url: asset.imageName || asset.url || "",
+                params: asset.params || {}
+            })) : [];
+
+            if (newBoxes.length === 0 && newPlacedAssets.length === 0) {
+                alert("No insertable content found in file.");
+                return;
+            }
+
+            // Determine the bottom edge of the current layout
+            let currentBottom = -Infinity;
+            boxes.forEach(box => { currentBottom = Math.max(currentBottom, box.y + box.height); });
+            placedAssets.forEach(asset => {
+                const rows = (asset.scale && asset.scale.rows) || 1;
+                currentBottom = Math.max(currentBottom, asset.y + rows * GRID_SIZE);
+            });
+            if (currentBottom === -Infinity) currentBottom = 0;
+
+            // Determine the top edge of the incoming content
+            let incomingTop = Infinity;
+            newBoxes.forEach(box => { incomingTop = Math.min(incomingTop, box.y); });
+            newPlacedAssets.forEach(asset => { incomingTop = Math.min(incomingTop, asset.y); });
+            if (incomingTop === Infinity) incomingTop = 0;
+
+            const GAP_FT = 25;
+            const targetTop = currentBottom + GAP_FT * GRID_SIZE;
+            const shiftY = targetTop - incomingTop;
+
+            newBoxes.forEach(box => { box.y += shiftY; });
+            newPlacedAssets.forEach(asset => { asset.y += shiftY; });
+
+            boxes = boxes.concat(newBoxes);
+            placedAssets = placedAssets.concat(newPlacedAssets);
+
+            if (Array.isArray(json.objectParamDefs)) {
+                json.objectParamDefs.forEach(def => {
+                    if (!objectParamDefs.some(d => d.name === def.name)) {
+                        objectParamDefs.push(def);
+                    }
+                });
+                renderParamManager();
+            }
+
+            const roomMap = new Map();
+            boxes.forEach(box => {
+                const count = roomMap.get(box.name) || 0;
+                roomMap.set(box.name, count + 1);
+            });
+            const selectedRooms = Array.from(roomMap.entries()).map(([room, count]) => ({ room, count }));
+            localStorage.setItem('selectedRooms', JSON.stringify(selectedRooms));
+
+            const missingUrls = newPlacedAssets
+                .map(a => a.url)
+                .filter(url => url && !imageCache[url]);
+
+            const preloadMissing = missingUrls.map(url => new Promise(resolve => {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = () => { imageCache[url] = img; resolve(); };
+                img.onerror = () => resolve();
+                img.src = url;
+            }));
+
+            Promise.all(preloadMissing).then(() => {
+                draw();
+            });
+
+        } catch (error) {
+            alert("Error reading file: " + error.message);
+        } finally {
+            event.target.value = "";
+        }
+    };
+
+    reader.readAsText(file);
+});
+
+
+document.getElementById('btnobjectsettings').addEventListener('click', function (e) {
+      e.stopPropagation();
+      const container = document.getElementById('librarySettingsContainer');
+      const isOpening = !container.classList.contains('open');
+      container.classList.toggle('open', isOpening);
+      this.classList.toggle('clicked', isOpening);
+      if (isOpening) renderParamManager();
+    });
+
+    const btn = document.getElementById('btn11');
+    const panel = document.getElementById('settingsPanel');
+
+    btn.addEventListener('click', () => {
+      const isOpening = panel.style.display !== 'block';
+      panel.style.display = isOpening ? 'block' : 'none';
+      btn.classList.toggle('clicked', isOpening);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        panel.style.display = 'none';
+      }
+      if (!event.target.closest('.dropdown-container')) {
+        panel.style.display = 'none';
+        btn.classList.remove('clicked');
+      }
+
+    });
+
+
+
+    zoomToFit();
+    draw();
+  </script>
+
+</body>
+</html>
