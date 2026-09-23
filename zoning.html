@@ -1296,7 +1296,10 @@ function loadConnectionsData(data, displayName) {
         });
       });
 
-      document.getElementById('zoning-filename').textContent = ' [' + displayName + ']';
+      let a = displayName.replace(/\.zoning$/i, '');
+      let b = a.length > 15 ? a.substring(0, 15) + '...' : a;
+
+      document.getElementById('zoning-filename').textContent = ' [' + b + ']';
 
       setTimeout(() => document.getElementById('zoom-fit-btn').click(), 50);
       updateGenerateBtn();
