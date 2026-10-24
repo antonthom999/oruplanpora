@@ -459,7 +459,7 @@
     const DEFAULT_FILL = "rgba(230, 230, 230, 1)";
     const SELECTED_FILL = "rgba(150, 50, 50, 1)";
 
-    const ASSET_SNAP_SIZE = 20; // Objects/assets always snap to half-grid (20px)
+    const ASSET_SNAP_SIZE = 10; // Objects/assets always snap to 1/4th-grid (10px)
 
     function snapAssetToGrid(value) {
       return Math.round(value / ASSET_SNAP_SIZE) * ASSET_SNAP_SIZE;
