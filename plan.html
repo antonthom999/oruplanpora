@@ -1422,7 +1422,13 @@ canvas.addEventListener("mousedown", (e) => {
       const asset = placedAssets[i];
       const width = asset.scale.cols * GRID_SIZE;
       const height = asset.scale.rows * GRID_SIZE;
-      if (mx >= asset.x && mx <= asset.x + width && my >= asset.y && my <= asset.y + height) {
+      const rot = ((asset.rotation || 0) % 360 + 360) % 360;
+      const swap = rot === 90 || rot === 270;
+      const hitW = swap ? height : width;
+      const hitH = swap ? width : height;
+      const cx = asset.x + width / 2;
+      const cy = asset.y + height / 2;
+      if (mx >= cx - hitW / 2 && mx <= cx + hitW / 2 && my >= cy - hitH / 2 && my <= cy + hitH / 2) {
 
           if (selectedPlacedAssets.includes(asset) && selectedBoxes.length > 0) {
               mixedGroupDrag = true;
@@ -1781,7 +1787,13 @@ canvas.addEventListener("mousedown", (e) => {
 
         selectedBoxes = boxes.filter(box => isIntersecting(selectionBox, box));
         selectedPlacedAssets = placedAssets.filter(a => isIntersecting(selectionBox,
-          { x: a.x, y: a.y, width: a.scale.cols * GRID_SIZE, height: a.scale.rows * GRID_SIZE }));
+          (() => {
+            const w = a.scale.cols * GRID_SIZE, h = a.scale.rows * GRID_SIZE;
+            const r = ((a.rotation || 0) % 360 + 360) % 360;
+            const sw = r === 90 || r === 270;
+            const bw = sw ? h : w, bh = sw ? w : h;
+            return { x: a.x + w / 2 - bw / 2, y: a.y + h / 2 - bh / 2, width: bw, height: bh };
+          })()));
         selectedPlacedAsset = selectedPlacedAssets.length === 1 ? selectedPlacedAssets[0] : null;
         updateImageControlsVisibility(selectedBoxes);
         draw();
@@ -1812,7 +1824,13 @@ canvas.addEventListener("mousedown", (e) => {
         selectedBoxes = boxes.filter(box => isIntersecting(selectionBox, box));
         selected = selectedBoxes.length === 1 ? selectedBoxes[0] : null;
         selectedPlacedAssets = placedAssets.filter(a => isIntersecting(selectionBox,
-          { x: a.x, y: a.y, width: a.scale.cols * GRID_SIZE, height: a.scale.rows * GRID_SIZE }));
+          (() => {
+            const w = a.scale.cols * GRID_SIZE, h = a.scale.rows * GRID_SIZE;
+            const r = ((a.rotation || 0) % 360 + 360) % 360;
+            const sw = r === 90 || r === 270;
+            const bw = sw ? h : w, bh = sw ? w : h;
+            return { x: a.x + w / 2 - bw / 2, y: a.y + h / 2 - bh / 2, width: bw, height: bh };
+          })()));
         selectedPlacedAsset = selectedPlacedAssets.length === 1 ? selectedPlacedAssets[0] : null;
         selectionBox = null;
         updateImageControlsVisibility(selectedBoxes);
@@ -1844,7 +1862,6 @@ canvas.addEventListener("mousedown", (e) => {
 
       draw();
     });
-
 
 
     // ── Touch support ────────────────────────────────────────
